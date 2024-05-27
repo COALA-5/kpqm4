@@ -257,3 +257,12 @@ void aes256_ctx_release(aes256ctx *r) {
     (void) r;
 }
 
+// Added for NTRU+ AES Implementation
+void aes256ctr_prf(uint8_t *out, size_t outlen, const uint8_t key[32], const uint8_t nonce[12]) {
+    aes256ctx ctx;
+
+    aes256_ctr_keyexp(&ctx, key);
+    aes256_ctr(out, outlen, nonce, &ctx);
+    //br_aes_ct64_ctr_init(sk_exp, key);
+    //br_aes_ct64_ctr_run(ctx.sk_exp, nonce, 0, out, outlen);
+}

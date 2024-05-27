@@ -230,3 +230,11 @@ void aes256_ctr(unsigned char *out, size_t outlen, const unsigned char *iv,
 void aes256_ctx_release(aes256ctx *r){
     (void) r;
 }
+
+// Added for NTRU+ AES Implementation
+void aes256ctr_prf(uint8_t *out, size_t outlen, const uint8_t key[32], const uint8_t nonce[12]) {
+    aes256ctx ctx;
+
+    aes256_ctr_keyexp(&ctx, key);
+    aes256_ctr(out, outlen, nonce, &ctx);
+}
