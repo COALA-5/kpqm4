@@ -58,7 +58,13 @@ unsigned int stack_key_gen, stack_encaps, stack_decaps;
 static int test_keys(void) {
   // Alice generates a public key
   hal_spraystack();
-  MUPQ_crypto_kem_keypair(pk, sk_a);
+#ifdef KPQM4_PALOMA
+    gf2m_tab table;
+    gen_precomputation_tab(&table);
+    MUPQ_crypto_kem_keypair(pk, sk_a, &table);
+#else
+    MUPQ_crypto_kem_keypair(pk, sk_a);
+#endif
   stack_key_gen = hal_checkstack();
 
   // Bob derives a secret key and creates a response
@@ -68,7 +74,9 @@ static int test_keys(void) {
 
   // Alice uses Bobs response to get her secret key
   hal_spraystack();
-#ifdef KPQM4
+#if defined (KPQM4_PALOMA)
+    MUPQ_crypto_kem_dec(key_a, sendb, sk_a, &table);
+#elif defined (KPQM4)
     MUPQ_crypto_kem_dec(key_a, sk_a, pk, sendb);
 #else
     MUPQ_crypto_kem_dec(key_a, sendb, sk_a);

@@ -99,7 +99,13 @@ int main(void)
   for(i=0;i<NTESTS;i++)
   {
     // Key-pair generation
+#ifdef KPQM4_PALOMA
+    gf2m_tab table;
+    gen_precomputation_tab(&table);
+    MUPQ_crypto_kem_keypair(pk, sk_a, &table);
+#else
     MUPQ_crypto_kem_keypair(pk, sk_a);
+#endif
 
     printbytes(pk,MUPQ_CRYPTO_PUBLICKEYBYTES);
     printbytes(sk_a,MUPQ_CRYPTO_SECRETKEYBYTES);
@@ -111,7 +117,9 @@ int main(void)
     printbytes(key_b,MUPQ_CRYPTO_BYTES);
 
     // Decapsulation
-#ifdef KPQM4
+#if defined (KPQM4_PALOMA)
+    MUPQ_crypto_kem_dec(key_a, sendb, sk_a, &table);
+#elif defined (KPQM4)
     MUPQ_crypto_kem_dec(key_a, sk_a, pk, sendb);
 #else
     MUPQ_crypto_kem_dec(key_a, sendb, sk_a);

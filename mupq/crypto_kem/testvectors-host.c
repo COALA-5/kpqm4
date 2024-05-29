@@ -68,11 +68,19 @@ static int test_keys(void)
     hal_send_str("DONE key pair generation!");
 
     //Bob derives a secret key and creates a response
+#ifdef KPQM4_PALOMA
+    gf2m_tab table;
+    gen_precomputation_tab(&table);
+    MUPQ_crypto_kem_keypair(pk+8, sk_a+8, &table);
+#else
     MUPQ_crypto_kem_enc(sendb+8, key_b+8, pk+8);
+#endif
     hal_send_str("DONE encapsulation!");
 
     //Alice uses Bobs response to get her secret key
-#ifdef KPQM4
+#if defined (KPQM4_PALOMA)
+    MUPQ_crypto_kem_dec(key_a, sendb, sk_a, &table);
+#elif defined (KPQM4)
     MUPQ_crypto_kem_dec(key_a, sk_a, pk, sendb);
 #else
     MUPQ_crypto_kem_dec(key_a, sendb, sk_a);
@@ -121,7 +129,9 @@ static int test_invalid_sk_a(void)
     randombytes(sk_a, MUPQ_CRYPTO_SECRETKEYBYTES);
 
     //Alice uses Bobs response to get her secre key
-#ifdef KPQM4
+#if defined (KPQM4_PALOMA)
+    MUPQ_crypto_kem_dec(key_a, sendb, sk_a, &table);
+#elif defined (KPQM4)
     MUPQ_crypto_kem_dec(key_a, sk_a, pk, sendb);
 #else
     MUPQ_crypto_kem_dec(key_a, sendb, sk_a);
@@ -165,7 +175,9 @@ static int test_invalid_ciphertext(void)
     randombytes(sendb, sizeof(sendb));
 
     //Alice uses Bobs response to get her secret key
-#ifdef KPQM4
+#if defined (KPQM4_PALOMA)
+    MUPQ_crypto_kem_dec(key_a, sendb, sk_a, &table);
+#elif defined (KPQM4)
     MUPQ_crypto_kem_dec(key_a, sk_a, pk, sendb);
 #else
     MUPQ_crypto_kem_dec(key_a, sendb, sk_a);

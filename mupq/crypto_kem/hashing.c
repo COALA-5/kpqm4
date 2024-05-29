@@ -44,7 +44,13 @@ int main(void)
     // Key-pair generation
     hash_cycles = 0;
     t0 = hal_get_time();
+#ifdef KPQM4_PALOMA
+    gf2m_tab table;
+    gen_precomputation_tab(&table);
+    MUPQ_crypto_kem_keypair(pk, sk, &table);
+#else
     MUPQ_crypto_kem_keypair(pk, sk);
+#endif
     t1 = hal_get_time();
     printcycles("keypair cycles:", t1-t0);
     printcycles("keypair hash cycles:", hash_cycles);
@@ -60,10 +66,12 @@ int main(void)
     // Decapsulation
     hash_cycles = 0;
     t0 = hal_get_time();
-#ifdef KPQM4
-    MUPQ_crypto_kem_dec(key_b, sk, pk, ct);
+#if defined (KPQM4_PALOMA)
+    MUPQ_crypto_kem_dec(key_a, ct, sk, &table);
+#elif defined (KPQM4)
+    MUPQ_crypto_kem_dec(key_a, sk, pk, ct);
 #else
-    MUPQ_crypto_kem_dec(key_b, ct, sk);
+    MUPQ_crypto_kem_dec(key_a, ct, sk);
 #endif
     t1 = hal_get_time();
     printcycles("decaps cycles:", t1-t0);

@@ -64,7 +64,13 @@ static int test_keys(void)
   for(i=0; i<NTESTS; i++)
   {
     //Alice generates a public key
+#ifdef KPQM4_PALOMA
+    gf2m_tab table;
+    gen_precomputation_tab(&table);
+    MUPQ_crypto_kem_keypair(pk+8, sk_a+8, &table);
+#else
     MUPQ_crypto_kem_keypair(pk+8, sk_a+8);
+#endif
     hal_send_str("DONE key pair generation!");
 
     //Bob derives a secret key and creates a response
@@ -72,7 +78,9 @@ static int test_keys(void)
     hal_send_str("DONE encapsulation!");
 
     //Alice uses Bobs response to get her secret key
-#ifdef KPQM4
+#if defined (KPQM4_PALOMA)
+    MUPQ_crypto_kem_dec(key_a+8, sendb+8, sk_a+8, &table);
+#elif defined (KPQM4)
     MUPQ_crypto_kem_dec(key_a+8, sk_a+8, pk+8, sendb+8);
 #else
     MUPQ_crypto_kem_dec(key_a+8, sendb+8, sk_a+8);
@@ -112,7 +120,13 @@ static int test_invalid_sk_a(void)
   for(i=0; i<NTESTS; i++)
   {
     //Alice generates a public key
+#ifdef KPQM4_PALOMA
+    gf2m_tab table;
+    gen_precomputation_tab(&table);
+    MUPQ_crypto_kem_keypair(pk, sk_a, &table);
+#else
     MUPQ_crypto_kem_keypair(pk, sk_a);
+#endif
 
     //Bob derives a secret key and creates a response
     MUPQ_crypto_kem_enc(sendb, key_b, pk);
@@ -121,7 +135,9 @@ static int test_invalid_sk_a(void)
     randombytes(sk_a, MUPQ_CRYPTO_SECRETKEYBYTES);
 
     //Alice uses Bobs response to get her secre key
-#ifdef KPQM4
+#if defined (KPQM4_PALOMA)
+    MUPQ_crypto_kem_dec(key_a, sendb, sk_a, &table);
+#elif defined (KPQM4)
     MUPQ_crypto_kem_dec(key_a, sk_a, pk, sendb);
 #else
     MUPQ_crypto_kem_dec(key_a, sendb, sk_a);
@@ -156,7 +172,13 @@ static int test_invalid_ciphertext(void)
     randombytes((unsigned char *)&pos, sizeof(size_t));
 
     //Alice generates a public key
+#ifdef KPQM4_PALOMA
+    gf2m_tab table;
+    gen_precomputation_tab(&table);
+    MUPQ_crypto_kem_keypair(pk, sk_a, &table);
+#else
     MUPQ_crypto_kem_keypair(pk, sk_a);
+#endif
 
     //Bob derives a secret key and creates a response
     MUPQ_crypto_kem_enc(sendb, key_b, pk);
@@ -165,7 +187,9 @@ static int test_invalid_ciphertext(void)
     randombytes(sendb, sizeof(sendb));
 
     //Alice uses Bobs response to get her secret key
-#ifdef KPQM4
+#if defined (KPQM4_PALOMA)
+    MUPQ_crypto_kem_dec(key_a, sendb, sk_a, &table);
+#elif defined (KPQM4)
     MUPQ_crypto_kem_dec(key_a, sk_a, pk, sendb);
 #else
     MUPQ_crypto_kem_dec(key_a, sendb, sk_a);
