@@ -48,13 +48,25 @@ unsigned int stack_key_gen, stack_sign, stack_verify;
 static int test_sign(void) {
   // Alice generates a public key
   hal_spraystack();
-  MUPQ_crypto_sign_keypair(pk, sk);
+#ifdef KPQM4_MQSIGN
+    uint8_t seed[48] = {0,};
+    uint8_t ss[32] = {0,};
+    //randombytes_init(seed, NULL, 256);
+    randombytes(seed, 48);
+    MUPQ_crypto_sign_keypair(pk, sk, seed);
+#else 
+    MUPQ_crypto_sign_keypair(pk, sk);
+#endif
   stack_key_gen = hal_checkstack();
 
   // Bob derives a secret key and creates a response
   randombytes(m, MLEN);
   hal_spraystack();
-  MUPQ_crypto_sign(sm, &smlen, m, MLEN, sk);
+#ifdef KPQM4_MQSIGN
+    MUPQ_crypto_sign(sm, &smlen, sm, MLEN, sk, seed, ss);
+#else 
+    MUPQ_crypto_sign(sm, &smlen, sm, MLEN, sk);
+#endif
   stack_sign = hal_checkstack();
 
   // Alice uses Bobs response to get her secret key

@@ -2,6 +2,7 @@
 #include "api.h"
 #include "hal.h"
 #include "sendfn.h"
+#include "randombytes.h"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -47,7 +48,15 @@ int main(void)
     // Key-pair generation
     hash_cycles = 0;
     t0 = hal_get_time();
+#ifdef KPQM4_MQSIGN
+    uint8_t seed[48] = {0,};
+    uint8_t ss[32] = {0,};
+    //randombytes_init(seed, NULL, 256);
+    randombytes(seed, 48);
+    MUPQ_crypto_sign_keypair(pk, sk, seed);
+#else 
     MUPQ_crypto_sign_keypair(pk, sk);
+#endif
     t1 = hal_get_time();
     printcycles("keypair cycles:", t1-t0);
     printcycles("keypair hash cycles:", hash_cycles);
@@ -55,7 +64,11 @@ int main(void)
     // Signing
     hash_cycles = 0;
     t0 = hal_get_time();
+#ifdef KPQM4_MQSIGN
+    MUPQ_crypto_sign(sm, &smlen, sm, MLEN, sk, seed, ss);
+#else 
     MUPQ_crypto_sign(sm, &smlen, sm, MLEN, sk);
+#endif
     t1 = hal_get_time();
     printcycles("sign cycles:", t1-t0);
     printcycles("sign hash cycles:", hash_cycles);

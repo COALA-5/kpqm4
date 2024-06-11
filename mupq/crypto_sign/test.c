@@ -66,11 +66,23 @@ static int test_sign(void)
     write_canary(m); write_canary(m+sizeof(m)-8);
 
     for (i = 0; i < NTESTS; i++) {
-        MUPQ_crypto_sign_keypair(pk+8, sk+8);
+#ifdef KPQM4_MQSIGN
+        uint8_t seed[48] = {0,};
+        uint8_t ss[32] = {0,};
+        //randombytes_init(seed, NULL, 256);
+        randombytes(seed, 48);
+        MUPQ_crypto_sign_keypair(pk+8, sk+8, seed);
+#else 
+        MUPQ_crypto_sign_keypair(pk+8, sk+8); 
+#endif
         hal_send_str("crypto_sign_keypair DONE.\n");
 
         randombytes(m+8, MLEN);
+#ifdef KPQM4_MQSIGN
+        MUPQ_crypto_sign(sm+8, &smlen, m+8, MLEN, sk+8, seed, ss);
+#else 
         MUPQ_crypto_sign(sm+8, &smlen, m+8, MLEN, sk+8);
+#endif
         hal_send_str("crypto_sign DONE.\n");
 
         // By relying on m == sm we prevent having to allocate CRYPTO_BYTES twice
@@ -115,15 +127,31 @@ static int test_wrong_pk(void)
 
     for (i = 0; i < NTESTS; i++) {
         #ifndef BIG_PUBLIC_KEY_TESTS
+#ifdef KPQM4_MQSIGN
+        uint8_t seed[48] = {0,};
+        uint8_t ss[32] = {0,};
+        //randombytes_init(seed, NULL, 256);
+        randombytes(seed, 48);
+        MUPQ_crypto_sign_keypair(pk2, sk, seed);
+#else 
         MUPQ_crypto_sign_keypair(pk2, sk);
+#endif
         hal_send_str("crypto_sign_keypair DONE.\n");
         #endif
 
+#ifdef KPQM4_MQSIGN
+        MUPQ_crypto_sign_keypair(pk, sk, seed);
+#else 
         MUPQ_crypto_sign_keypair(pk, sk);
+#endif
         hal_send_str("crypto_sign_keypair DONE.\n");
 
         randombytes(m, MLEN);
-        MUPQ_crypto_sign(sm, &smlen, m, MLEN, sk);
+#ifdef KPQM4_MQSIGN
+        MUPQ_crypto_sign(sm, &smlen, sm, MLEN, sk, seed, ss);
+#else 
+        MUPQ_crypto_sign(sm, &smlen, sm, MLEN, sk);
+#endif
         hal_send_str("crypto_sign DONE.\n");
 
         #ifdef BIG_PUBLIC_KEY_TESTS

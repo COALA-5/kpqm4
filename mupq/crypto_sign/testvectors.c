@@ -104,14 +104,25 @@ int main(void)
   for(i=0; i<MAXMLEN; i=(i==0)?i+1:i<<1)
   {
     randombytes(mi,i);
-
+    
+#ifdef KPQM4_MQSIGN
+    uint8_t seed[48] = {0,};
+    uint8_t ss[32] = {0,};
+    //randombytes_init(seed, NULL, 256);
+    randombytes(seed, 48);
+    MUPQ_crypto_sign_keypair(pk, sk, seed);
+#else 
     MUPQ_crypto_sign_keypair(pk, sk);
+#endif
 
     printbytes(pk,MUPQ_CRYPTO_PUBLICKEYBYTES);
     printbytes(sk,MUPQ_CRYPTO_SECRETKEYBYTES);
 
+#ifdef KPQM4_MQSIGN
+    MUPQ_crypto_sign(sm, &smlen, mi, i, sk, seed, ss);
+#else 
     MUPQ_crypto_sign(sm, &smlen, mi, i, sk);
-
+#endif
     printbytes(sm, smlen);
 
     // By relying on m == sm we prevent having to allocate CRYPTO_BYTES twice
