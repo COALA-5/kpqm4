@@ -1,14 +1,28 @@
 #include "io.h"
+#include "hal.h"
 
 void save_to_string(uint8_t *output, const ciphertext *ctxt) {
     Rp_vec_to_bytes(output, &(ctxt->c1));
+    hal_send_str("Rp_vec_to_bytes end");
     Rp2_to_bytes(output + CTPOLYVEC_BYTES, &(ctxt->c2));
+    hal_send_str("Rp2_to_bytes end");
+
+    // for (int i = 0; i < MODULE_RANK; i++) {
+    //     for (int j = 0; j < sizeof(poly); j++) {
+    //         output[i] = ctxt->c1.vec[i].coeffs[j];
+    //     }
+    //     hal_send_str("for loop");
+    // }
+    // for (int i = 0; i < sizeof(poly); i++) {
+    //     output[i + CTPOLYVEC_BYTES] = (uint8_t)ctxt->c2.coeffs[i];
+    //     hal_send_str("for loop    2 ");
+    // }
 }
 
 void save_to_file(char *file_path, const uint8_t *ctxt) {
     FILE *f = fopen(file_path, "wb");
     if (f == NULL) {
-        printf("Cannot open file in save_to_file\n");
+        // printf("Cannot open file in save_to_file\n");
         return;
     }
     fwrite(ctxt, sizeof(uint8_t), CIPHERTEXT_BYTES, f);
@@ -23,12 +37,12 @@ void load_from_string(ciphertext *ctxt, const uint8_t *input) {
 void load_from_file(uint8_t *ctxt, const char *file_path) {
     FILE *f = fopen(file_path, "rb");
     if (f == NULL) {
-        printf("Cannot open file in load_from_file\n");
+        // printf("Cannot open file in load_from_file\n");
         return;
     }
     size_t res = fread(ctxt, sizeof(uint8_t), CIPHERTEXT_BYTES, f);
     if (res != (sizeof(uint8_t) * CIPHERTEXT_BYTES)) {
-        printf("Ctxt File reading error\n");
+        // printf("Ctxt File reading error\n");
         memset(ctxt, 0, CIPHERTEXT_BYTES);
     }
     fclose(f);

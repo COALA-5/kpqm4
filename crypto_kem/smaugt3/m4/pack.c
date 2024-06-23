@@ -1,5 +1,6 @@
 #include "pack.h"
 #include <stdlib.h>
+#include "hal.h"
 
 /*************************************************
  * Name:        Rq_to_bytes
@@ -190,8 +191,18 @@ void bytes_to_Rq_mat(polyvec data[MODULE_RANK],
  **************************************************/
 void Rp_to_bytes(uint8_t bytes[CTPOLY1_BYTES], const poly *data) {
     memset(bytes, 0, sizeof(uint8_t) * CTPOLY1_BYTES);
-    for (size_t i = 0; i < LWE_N; ++i)
+    hal_send_str("memset end...");
+    // for (int i = 0; i < CTPOLY1_BYTES; i++) {
+    //     hal_send_str("memset start...");
+    //     bytes[i] = 0;
+    // }
+    hal_send_str("memset fin");
+    for (size_t i = 0; i < LWE_N; ++i) {
         memcpy(&(bytes[i]), &(data->coeffs[i]), sizeof(uint8_t));
+        // for(int j = 0; j < LWE_N; j++) {
+        //     bytes[j] = data->coeffs[j];
+        // }
+    }
 }
 
 void Rp2_to_bytes(uint8_t bytes[CTPOLY2_BYTES], const poly *data) {
@@ -309,8 +320,10 @@ void bytes_to_Rp2(poly *data, const uint8_t bytes[CTPOLY2_BYTES]) {
  *              - uint16_t *data: pointer to input vector of polynomial in Rp
  **************************************************/
 void Rp_vec_to_bytes(uint8_t bytes[CTPOLYVEC_BYTES], const polyvec *data) {
-    for (size_t i = 0; i < MODULE_RANK; ++i)
+    for (size_t i = 0; i < MODULE_RANK; ++i){ 
         Rp_to_bytes(bytes + i * CTPOLY1_BYTES, &(data->vec[i]));
+        hal_send_str("Rp_vec_to_bytes - for loop");
+    }
 }
 
 /*************************************************

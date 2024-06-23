@@ -2,6 +2,7 @@
 #ifndef SMAUG_PARAMETERS_H
 #define SMAUG_PARAMETERS_H
 
+#include <stdlib.h>
 
 
 #define LOG_LWE_N 8             // log dim
@@ -63,6 +64,20 @@
 #define PKPOLYVEC_BYTES (PKPOLY_BYTES * MODULE_RANK)                            // vector with element in R_q
 #define PKPOLYMAT_BYTES (PKPOLYVEC_BYTES * MODULE_RANK)                         // matrix with element in R_q
 #define PUBLICKEY_BYTES (PKSEED_BYTES + PKPOLYVEC_BYTES)                        // (A seed, b(x) vector)
+
+static inline
+void * adapted_alloc( size_t alignment, size_t size )
+{
+#if defined(_HAS_ALIGNED_ALLOC_)
+  return aligned_alloc( alignment, size );
+#else
+  (void)(alignment);
+  return malloc( size );
+#endif
+}
+
+#define malloc(size) adapted_alloc(16, size)
+
 
 // clang-format on
 

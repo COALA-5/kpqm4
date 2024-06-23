@@ -77,6 +77,7 @@ void indcpa_keypair(uint8_t pk[PUBLICKEY_BYTES],
  *              - uint8_t *delta: pointer to input random delta (of length
  *                DELTA_BYTES) to deterministically generate all randomness
  **************************************************/
+#include "hal.h"
 void indcpa_enc(uint8_t ctxt[CIPHERTEXT_BYTES],
                 const uint8_t pk[PUBLICKEY_BYTES],
                 const uint8_t mu[DELTA_BYTES],
@@ -85,6 +86,7 @@ void indcpa_enc(uint8_t ctxt[CIPHERTEXT_BYTES],
     uint8_t seed_r[DELTA_BYTES] = {0};
     public_key pk_tmp;
     load_from_string_pk(&pk_tmp, pk);
+    hal_send_str("load_from_string_pk end");
 
     // Compute a vector r = hwt(delta, H'(pk))
     sppoly r[MODULE_RANK];
@@ -95,14 +97,18 @@ void indcpa_enc(uint8_t ctxt[CIPHERTEXT_BYTES],
     else
         cmov(seed_r, seed, DELTA_BYTES, 1);
     genRx_vec(r, seed_r, DELTA_BYTES);
+    hal_send_str("genRx_vec end");
 
     // Compute c1(x), c2(x)
     ciphertext ctxt_tmp;
     memset(&ctxt_tmp, 0, sizeof(ciphertext));
     computeC1(&(ctxt_tmp.c1), pk_tmp.A, r);
+    hal_send_str("computeC1 end");
     computeC2(&ctxt_tmp.c2, mu, &pk_tmp.b, r);
+    hal_send_str("computeC2 end");
 
     save_to_string(ctxt, &ctxt_tmp);
+    hal_send_str("save_to_string end");
     for (size_t i = 0; i < MODULE_RANK; ++i) {
         memset(r[i].sx, 0, r[i].cnt);
         free(r[i].sx);
