@@ -61,9 +61,9 @@ void genSx_vec(secret_key *sk, const uint8_t seed[CRYPTO_BYTES]) {
 
     hwt(res, cnt_arr, seed, CRYPTO_BYTES, HS);
 
-    for (size_t i = 0; i < MODULE_RANK; ++i) {
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i) {
         (sk->sp_vec[i]).cnt = cnt_arr[i];
-        //(sk->sp_vec[i]).sx = (uint8_t *)malloc(cnt_arr * sizeof(uint8_t));
+        //(sk->sp_vec[i]).sx = (uint8_t *)malloc(cnt_arr[i] * sizeof(uint8_t));
         (sk->sp_vec[i]).neg_start = convToIdx(
             (sk->sp_vec[i]).sx, (sk->sp_vec[i]).cnt, res + (i * LWE_N), LWE_N);
     }

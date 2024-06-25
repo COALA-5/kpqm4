@@ -46,7 +46,7 @@ int crypto_kem_enc(uint8_t *ctxt, uint8_t *ss, const uint8_t *pk) {
     indcpa_enc(ctxt, pk, mu, buf);
     hal_send_str("end indcpa_enc");
     cmov(ss, buf + DELTA_BYTES, CRYPTO_BYTES, 1);
-    hal_send_str("end indcpa_enc");
+//     hal_send_str("end indcpa_enc");
 
     return 0;
 }

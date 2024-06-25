@@ -7,6 +7,39 @@
 
 #define SMAUG_MODE 5
 
+#if SMAUG_MODE == 1
+#define SMAUG_NAMESPACE(s) cryptolab_smaug1_##s
+
+#define LAMBDA 128              // security
+#define MODULE_RANK 2           // rank of the module, in (2, 3, 5)
+#define DIMENSION MODULE_RANK * LWE_N
+#define NOISE_D1                // discrete Gaussian sampling option
+
+#define LOG_Q 10                // public key modulus
+#define LOG_P2 5                // ciphertext2 modulus
+#define HS 140                  // Hamming weight of coefficient vector s
+#define HR 132                  // Hamming weight of coefficient vector r
+
+#define RD_ADD2 0x0400          // 2^(15 - LOG_P2)
+#define RD_AND2 0xf800          // 2^16 - 2^(16 - LOG_P2)
+
+#elif SMAUG_MODE == 3
+#define SMAUG_NAMESPACE(s) cryptolab_smaug3_##s
+
+#define LAMBDA 192              // security
+#define MODULE_RANK 3           // rank of the module, in (2, 3, 5)
+#define DIMENSION MODULE_RANK * LWE_N
+#define NOISE_D2                // discrete Gaussian sampling option
+
+#define LOG_Q 11                // public key modulus
+#define LOG_P2 8                // ciphertext2 modulus
+#define HS 198                  // Hamming weight of coefficient vector s
+#define HR 151                  // Hamming weight of coefficient vector r
+
+#define RD_ADD2 0x0080          // 2^(15 - LOG_P2)
+#define RD_AND2 0xff00          // 2^16 - 2^(16 - LOG_P2)
+
+#elif SMAUG_MODE == 5
 #define SMAUG_NAMESPACE(s) cryptolab_smaug5_##s
 
 #define LAMBDA 256              // security
@@ -21,7 +54,7 @@
 
 #define RD_ADD2 0x0200          // 2^(15 - LOG_P2)
 #define RD_AND2 0xfc00          // 2^16 - 2^(16 - LOG_P2)
-
+#endif
 
 #define LOG_P 8	                // ciphertext modulus
 

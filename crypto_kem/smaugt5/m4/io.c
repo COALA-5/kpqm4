@@ -1,14 +1,45 @@
 #include "io.h"
+#include "hal.h"
 
 void save_to_string(uint8_t *output, const ciphertext *ctxt) {
     Rp_vec_to_bytes(output, &(ctxt->c1));
+
+    //! YB code Start
+    // for (int cnt_i = 0 ; cnt_i < MODULE_RANK ; cnt_i ++)
+    // {
+    //     for(int cnt_j = 0 ; cnt_j < 256 ; cnt_j ++)
+    //     {
+    //         output[cnt_i * 256 + cnt_j] = cnt_j;
+    //     }        
+    //     hal_send_str("Rp_vec_to_bytes - for loop");
+    // }
+    
+    // // memset(output, 0, sizeof(uint8_t) * CTPOLY1_BYTES);
+    // // for (int i = 0; i < 256; ++i) {
+    // //     memcpy(&(output[i]), ctxt->c1.vec + i, sizeof(uint8_t));
+    // // }
+    //Rp_to_bytes(bytes + i * CTPOLY1_BYTES, &(data->vec[i]));
+
+    //! YB code End
+
     Rp2_to_bytes(output + CTPOLYVEC_BYTES, &(ctxt->c2));
+
+    // for (int i = 0; i < MODULE_RANK; i++) {
+    //     for (int j = 0; j < sizeof(poly); j++) {
+    //         output[i] = ctxt->c1.vec[i].coeffs[j];
+    //     }
+    //     hal_send_str("for loop");
+    // }
+    // for (int i = 0; i < sizeof(poly); i++) {
+    //     output[i + CTPOLYVEC_BYTES] = (uint8_t)ctxt->c2.coeffs[i];
+    //     hal_send_str("for loop    2 ");
+    // }
 }
 
 void save_to_file(char *file_path, const uint8_t *ctxt) {
     FILE *f = fopen(file_path, "wb");
     if (f == NULL) {
-        printf("Cannot open file in save_to_file\n");
+        // printf("Cannot open file in save_to_file\n");
         return;
     }
     fwrite(ctxt, sizeof(uint8_t), CIPHERTEXT_BYTES, f);
@@ -23,12 +54,12 @@ void load_from_string(ciphertext *ctxt, const uint8_t *input) {
 void load_from_file(uint8_t *ctxt, const char *file_path) {
     FILE *f = fopen(file_path, "rb");
     if (f == NULL) {
-        printf("Cannot open file in load_from_file\n");
+        // printf("Cannot open file in load_from_file\n");
         return;
     }
-    size_t res = fread(ctxt, sizeof(uint8_t), CIPHERTEXT_BYTES, f);
+    unsigned long long res = fread(ctxt, sizeof(uint8_t), CIPHERTEXT_BYTES, f);
     if (res != (sizeof(uint8_t) * CIPHERTEXT_BYTES)) {
-        printf("Ctxt File reading error\n");
+        // printf("Ctxt File reading error\n");
         memset(ctxt, 0, CIPHERTEXT_BYTES);
     }
     fclose(f);
@@ -38,19 +69,19 @@ void load_from_file(uint8_t *ctxt, const char *file_path) {
 /////////////////////////////////////////////////////////////////////////////
 
 void save_to_string_sk(uint8_t *output, const secret_key *sk) {
-    size_t idx = 0;
+    unsigned long long idx = 0;
 
-    for (size_t i = 0; i < MODULE_RANK; ++i) {
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i) {
         cmov(output + idx, &(sk->sp_vec[i].cnt), sizeof(uint8_t), 1);
         idx += sizeof(uint8_t);
     }
 
-    for (size_t i = 0; i < MODULE_RANK; ++i) {
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i) {
         Sx_to_bytes(output + idx, sk->sp_vec[i].sx, sk->sp_vec[i].cnt);
         idx += sk->sp_vec[i].cnt;
     }
 
-    for (size_t i = 0; i < MODULE_RANK; ++i) {
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i) {
         cmov(output + idx, &(sk->sp_vec[i].neg_start), sizeof(uint8_t), 1);
         idx += sizeof(uint8_t);
     }
@@ -62,26 +93,26 @@ void save_to_file_sk(char *file_path, const uint8_t *sk, const int isPKE) {
         printf("Cannot open file in save_to_file_sk\n");
         return;
     }
-    size_t size = isPKE ? PKE_SECRETKEY_BYTES : KEM_SECRETKEY_BYTES;
+    unsigned long long size = isPKE ? PKE_SECRETKEY_BYTES : KEM_SECRETKEY_BYTES;
     fwrite(sk, sizeof(uint8_t), size, f);
     fclose(f);
 }
 
 void load_from_string_sk(secret_key *sk, const uint8_t *input) {
-    size_t idx = 0;
+    unsigned long long idx = 0;
 
-    for (size_t i = 0; i < MODULE_RANK; ++i) {
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i) {
         cmov(&(sk->sp_vec[i].cnt), input + idx, sizeof(uint8_t), 1);
         //sk->sp_vec[i].sx = (uint8_t *)malloc(sk->sp_vec[i].cnt * sizeof(uint8_t));
         idx += sizeof(uint8_t);
     }
 
-    for (size_t i = 0; i < MODULE_RANK; ++i) {
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i) {
         bytes_to_Sx(sk->sp_vec[i].sx, input + idx, sk->sp_vec[i].cnt);
         idx += sk->sp_vec[i].cnt;
     }
 
-    for (size_t i = 0; i < MODULE_RANK; ++i) {
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i) {
         cmov(&(sk->sp_vec[i].neg_start), input + idx, sizeof(uint8_t), 1);
         idx += sizeof(uint8_t);
     }
@@ -94,8 +125,8 @@ void load_from_file_sk(uint8_t *sk, const char *file_path, const int isPKE) {
         return;
     }
 
-    size_t size = isPKE ? PKE_SECRETKEY_BYTES : KEM_SECRETKEY_BYTES;
-    size_t res = fread(sk, sizeof(uint8_t), size, f);
+    unsigned long long size = isPKE ? PKE_SECRETKEY_BYTES : KEM_SECRETKEY_BYTES;
+    unsigned long long res = fread(sk, sizeof(uint8_t), size, f);
     if (res != size) {
         printf("SK File reading error\n");
         memset(sk, 0, size);
@@ -132,7 +163,7 @@ void load_from_file_pk(uint8_t *pk, const char *file_path) {
         printf("Cannot open file in load_from_file_pk\n");
         return;
     }
-    size_t res = fread(pk, sizeof(uint8_t), PUBLICKEY_BYTES, f);
+    unsigned long long res = fread(pk, sizeof(uint8_t), PUBLICKEY_BYTES, f);
     if (res != PUBLICKEY_BYTES) {
         printf("PK File reading error\n");
         memset(pk, 0, PUBLICKEY_BYTES);

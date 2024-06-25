@@ -41,16 +41,16 @@
  *
  * Arguments:   - uint16_t *op: pointer to output vector op
  *              - uint8_t *seed: pointer to input seed of length CRYPTO_BYTES +
- *                               sizeof(size_t))
+ *                               sizeof(unsigned long long))
  **************************************************/
 int addGaussianError(poly *op, const uint8_t *seed) {
     uint64_t seed_temp[SEED_LEN] = {0};
     shake128((uint8_t *)seed_temp, SEED_LEN * sizeof(uint64_t), seed,
-             CRYPTO_BYTES + sizeof(size_t));
+             CRYPTO_BYTES + sizeof(unsigned long long));
 
     uint16_t j = 0;
 
-    for (size_t i = 0; i < LWE_N; i += 64) {
+    for (unsigned long long i = 0; i < LWE_N; i += 64) {
         uint64_t *x = seed_temp + j;
 #ifdef NOISE_D1
         uint64_t s[2];
@@ -63,7 +63,7 @@ int addGaussianError(poly *op, const uint8_t *seed) {
                (~x[4] & ~x[6] & x[8]) | (~x[7] & x[8]);
         s[1] = (x[1] & x[2] & x[4] & x[5] & x[7] & x[8]) |
                (x[3] & x[4] & x[5] & x[7] & x[8]) | (x[6] & x[7] & x[8]);
-        for (size_t k = 0; k < 64; ++k) {
+        for (unsigned long long k = 0; k < 64; ++k) {
             op->coeffs[i + k] =
                 ((s[0] >> k) & 0x01) | (((s[1] >> k) & 0x01) << 1);
             uint16_t sign = (x[9] >> k) & 0x01;
@@ -94,7 +94,7 @@ int addGaussianError(poly *op, const uint8_t *seed) {
         s[2] = (x[1] & x[4] & x[5] & x[6] & x[7] & x[8] & x[9]) |
                (x[2] & x[4] & x[5] & x[6] & x[7] & x[8] & x[9]) |
                (x[3] & x[4] & x[5] & x[6] & x[7] & x[8] & x[9]);
-        for (size_t k = 0; k < 64; ++k) {
+        for (unsigned long long k = 0; k < 64; ++k) {
             op->coeffs[i + k] = ((s[0] >> k) & 0x01) |
                                 (((s[1] >> k) & 0x01) << 1) |
                                 (((s[2] >> k) & 0x01) << 2);
@@ -135,7 +135,7 @@ int addGaussianError(poly *op, const uint8_t *seed) {
                (x[3] & x[5] & x[6] & x[8] & x[9] & x[10]) |
                (x[4] & x[5] & x[6] & x[8] & x[9] & x[10]) |
                (x[7] & x[8] & x[9] & x[10]);
-        for (size_t k = 0; k < 64; ++k) {
+        for (unsigned long long k = 0; k < 64; ++k) {
             op->coeffs[i + k] = ((s[0] >> k) & 0x01) |
                                 (((s[1] >> k) & 0x01) << 1) |
                                 (((s[2] >> k) & 0x01) << 2);
@@ -184,7 +184,7 @@ int addGaussianError(poly *op, const uint8_t *seed) {
                (~x[6] & x[7] & x[8] & x[9]) | (~x[4] & x[7] & x[8] & x[9]) |
                (~x[2] & x[7] & x[8] & x[9]);
         s[3] = (x[2] & x[3] & x[4] & x[5] & x[6] & x[7] & x[8] & x[9]);
-        for (size_t k = 0; k < 64; ++k) {
+        for (unsigned long long k = 0; k < 64; ++k) {
             op->coeffs[i + k] =
                 ((s[0] >> k) & 0x01) | (((s[1] >> k) & 0x01) << 1) |
                 (((s[2] >> k) & 0x01) << 2) | (((s[3] >> k) & 0x01) << 3);
@@ -200,11 +200,11 @@ int addGaussianError(poly *op, const uint8_t *seed) {
 }
 
 void addGaussianErrorVec(polyvec *op, const uint8_t seed[CRYPTO_BYTES]) {
-    uint8_t seed_tmp[CRYPTO_BYTES + sizeof(size_t)] = {0};
+    uint8_t seed_tmp[CRYPTO_BYTES + sizeof(unsigned long long)] = {0};
     cmov(seed_tmp, seed, CRYPTO_BYTES, 1);
-    for (size_t i = 0; i < MODULE_RANK; ++i) {
-        size_t nonce = MODULE_RANK * i;
-        cmov(seed_tmp + CRYPTO_BYTES, (uint8_t *)&nonce, sizeof(size_t), 1);
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i) {
+        unsigned long long nonce = MODULE_RANK * i;
+        cmov(seed_tmp + CRYPTO_BYTES, (uint8_t *)&nonce, sizeof(unsigned long long), 1);
         addGaussianError(&(op->vec[i]), seed_tmp);
     }
 }

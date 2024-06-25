@@ -9,7 +9,7 @@
  *
  * Arguments:   - uint16_t *bytes: pointer to output bytes
  *              - uint16_t *data: pointer to input polynomial in Rq
- *              - size_t dlen: date length
+ *              - unsigned long long dlen: date length
  **************************************************/
 void Rq_to_bytes(uint8_t bytes[PKPOLY_BYTES], const poly *data) {
     uint16_t tmp[LWE_N] = {0};
@@ -69,7 +69,7 @@ void Rq_to_bytes(uint8_t bytes[PKPOLY_BYTES], const poly *data) {
  *
  * Arguments:   - uint16_t *data: pointer to output polynomial in Rq
  *              - uint16_t *bytes: pointer to input bytes
- *              - size_t dlen: date length
+ *              - unsigned long long dlen: date length
  **************************************************/
 void bytes_to_Rq(poly *data, const uint8_t bytes[PKPOLY_BYTES]) {
     uint16_t tmp[LWE_N] = {0};
@@ -135,7 +135,7 @@ void bytes_to_Rq(poly *data, const uint8_t bytes[PKPOLY_BYTES]) {
  *              - uint16_t *data: pointer to input vector of polynomial in Rq
  **************************************************/
 void Rq_vec_to_bytes(uint8_t bytes[PKPOLYVEC_BYTES], const polyvec *data) {
-    for (size_t i = 0; i < MODULE_RANK; ++i)
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i)
         Rq_to_bytes(bytes + i * PKPOLY_BYTES, &(data->vec[i]));
 }
 
@@ -148,7 +148,7 @@ void Rq_vec_to_bytes(uint8_t bytes[PKPOLYVEC_BYTES], const polyvec *data) {
  *              - uint16_t *bytes: pointer to input bytes
  **************************************************/
 void bytes_to_Rq_vec(polyvec *data, const uint8_t bytes[PKPOLYVEC_BYTES]) {
-    for (size_t i = 0; i < MODULE_RANK; ++i)
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i)
         bytes_to_Rq(&(data->vec[i]), bytes + i * PKPOLY_BYTES);
 }
 
@@ -162,7 +162,7 @@ void bytes_to_Rq_vec(polyvec *data, const uint8_t bytes[PKPOLYVEC_BYTES]) {
  **************************************************/
 void Rq_mat_to_bytes(uint8_t bytes[PKPOLYMAT_BYTES],
                      const polyvec data[MODULE_RANK]) {
-    for (size_t i = 0; i < MODULE_RANK; ++i)
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i)
         Rq_vec_to_bytes(bytes + i * PKPOLYVEC_BYTES, &(data[i]));
 }
 
@@ -177,7 +177,7 @@ void Rq_mat_to_bytes(uint8_t bytes[PKPOLYMAT_BYTES],
 void bytes_to_Rq_mat(polyvec data[MODULE_RANK],
                      const uint8_t bytes[PKPOLYMAT_BYTES]) {
 
-    for (size_t i = 0; i < MODULE_RANK; ++i)
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i)
         bytes_to_Rq_vec(&(data[i]), bytes + i * PKPOLYVEC_BYTES);
 }
 
@@ -191,26 +191,22 @@ void bytes_to_Rq_mat(polyvec data[MODULE_RANK],
  **************************************************/
 void Rp_to_bytes(uint8_t bytes[CTPOLY1_BYTES], const poly *data) {
     memset(bytes, 0, sizeof(uint8_t) * CTPOLY1_BYTES);
-    hal_send_str("memset end...");
     // for (int i = 0; i < CTPOLY1_BYTES; i++) {
     //     hal_send_str("memset start...");
     //     bytes[i] = 0;
     // }
-    hal_send_str("memset fin");
-    for (size_t i = 0; i < LWE_N; ++i) {
+    for (int i = 0; i < 256; ++i) {
         memcpy(&(bytes[i]), &(data->coeffs[i]), sizeof(uint8_t));
-        // for(int j = 0; j < LWE_N; j++) {
-        //     bytes[j] = data->coeffs[j];
-        // }
+        //bytes[i]=data->coeffs[i];
     }
 }
 
 void Rp2_to_bytes(uint8_t bytes[CTPOLY2_BYTES], const poly *data) {
     memset(bytes, 0, sizeof(uint8_t) * CTPOLY2_BYTES);
 #if LOG_P2 == 5
-    size_t b_idx = 0;
-    size_t d_idx = 0;
-    for (size_t i = 0; i < (LWE_N >> 3); ++i) {
+    unsigned long long b_idx = 0;
+    unsigned long long d_idx = 0;
+    for (unsigned long long i = 0; i < (LWE_N >> 3); ++i) {
         b_idx = 5 * i;
         d_idx = 8 * i;
 
@@ -230,14 +226,14 @@ void Rp2_to_bytes(uint8_t bytes[CTPOLY2_BYTES], const poly *data) {
 #endif
 
 #if LOG_P2 == 8
-    for (size_t i = 0; i < LWE_N; ++i)
+    for (unsigned long long i = 0; i < LWE_N; ++i)
         memcpy(&(bytes[i]), &(data->coeffs[i]), sizeof(uint8_t));
 #endif
 
 #if LOG_P2 == 6
-    size_t b_idx = 0;
-    size_t d_idx = 0;
-    for (size_t i = 0; i < (LWE_N >> 2); ++i) {
+    unsigned long long b_idx = 0;
+    unsigned long long d_idx = 0;
+    for (unsigned long long i = 0; i < (LWE_N >> 2); ++i) {
         b_idx = 3 * i;
         d_idx = 4 * i;
 
@@ -261,16 +257,16 @@ void Rp2_to_bytes(uint8_t bytes[CTPOLY2_BYTES], const poly *data) {
  **************************************************/
 void bytes_to_Rp(poly *data, const uint8_t bytes[CTPOLY1_BYTES]) {
     memset(data, 0, sizeof(poly));
-    for (size_t i = 0; i < LWE_N; ++i)
+    for (unsigned long long i = 0; i < LWE_N; ++i)
         memcpy(&(data->coeffs[i]), &(bytes[i]), sizeof(uint8_t));
 }
 
 void bytes_to_Rp2(poly *data, const uint8_t bytes[CTPOLY2_BYTES]) {
     memset(data, 0, sizeof(uint16_t) * LWE_N);
 #if LOG_P2 == 5
-    size_t b_idx = 0;
-    size_t d_idx = 0;
-    for (size_t i = 0; i < (LWE_N >> 3); ++i) {
+    unsigned long long b_idx = 0;
+    unsigned long long d_idx = 0;
+    for (unsigned long long i = 0; i < (LWE_N >> 3); ++i) {
         b_idx = 5 * i;
         d_idx = 8 * i;
 
@@ -290,14 +286,14 @@ void bytes_to_Rp2(poly *data, const uint8_t bytes[CTPOLY2_BYTES]) {
 #endif
 
 #if LOG_P2 == 8
-    for (size_t i = 0; i < LWE_N; ++i)
+    for (unsigned long long i = 0; i < LWE_N; ++i)
         memcpy(&(data->coeffs[i]), &(bytes[i]), sizeof(uint8_t));
 #endif
 
 #if LOG_P2 == 6
-    size_t b_idx = 0;
-    size_t d_idx = 0;
-    for (size_t i = 0; i < (LWE_N >> 2); ++i) {
+    unsigned long long b_idx = 0;
+    unsigned long long d_idx = 0;
+    for (unsigned long long i = 0; i < (LWE_N >> 2); ++i) {
         b_idx = 3 * i;
         d_idx = 4 * i;
 
@@ -320,9 +316,10 @@ void bytes_to_Rp2(poly *data, const uint8_t bytes[CTPOLY2_BYTES]) {
  *              - uint16_t *data: pointer to input vector of polynomial in Rp
  **************************************************/
 void Rp_vec_to_bytes(uint8_t bytes[CTPOLYVEC_BYTES], const polyvec *data) {
-    for (size_t i = 0; i < MODULE_RANK; ++i){ 
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i){
+         
         Rp_to_bytes(bytes + i * CTPOLY1_BYTES, &(data->vec[i]));
-        hal_send_str("Rp_vec_to_bytes - for loop");
+        //hal_send_str("Rp_vec_to_bytes - for loop");
     }
 }
 
@@ -335,7 +332,7 @@ void Rp_vec_to_bytes(uint8_t bytes[CTPOLYVEC_BYTES], const polyvec *data) {
  *              - uint16_t *bytes: pointer to input bytes
  **************************************************/
 void bytes_to_Rp_vec(polyvec *data, const uint8_t bytes[CTPOLYVEC_BYTES]) {
-    for (size_t i = 0; i < MODULE_RANK; ++i)
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i)
         bytes_to_Rp(&(data->vec[i]), bytes + i * CTPOLY1_BYTES);
 }
 

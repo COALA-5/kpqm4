@@ -57,7 +57,7 @@
 #define PKE_SECRETKEY_BYTES (SKPOLYVEC_BYTES + 2 * MODULE_RANK)                 // s(x) vector, neg_start vector, cnt_arr
 #define KEM_SECRETKEY_BYTES (PKE_SECRETKEY_BYTES + T_BYTES)                     // s(x) vector, neg_start vector, cnt_arr, t
 
-#define CIPHERTEXT_BYTES (CTPOLYVEC_BYTES + CTPOLY2_BYTES)                      // (vector c21, c22)
+#define CIPHERTEXT_BYTES 1024 //(CTPOLYVEC_BYTES + CTPOLY2_BYTES)                      // (vector c21, c22)
 
 #define PKSEED_BYTES (32)                                                       // seed for a(x) 32
 #define PKPOLY_BYTES ((LOG_Q * LWE_N) / 8)                                      // b(x)
@@ -66,7 +66,7 @@
 #define PUBLICKEY_BYTES (PKSEED_BYTES + PKPOLYVEC_BYTES)                        // (A seed, b(x) vector)
 
 static inline
-void * adapted_alloc( size_t alignment, size_t size )
+void * adapted_alloc( unsigned long long alignment, unsigned long long size )
 {
 #if defined(_HAS_ALIGNED_ALLOC_)
   return aligned_alloc( alignment, size );

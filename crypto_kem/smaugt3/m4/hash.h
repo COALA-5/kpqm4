@@ -14,9 +14,9 @@ typedef shake256incctx keccak_state;
 #define hash_g(OUT, OUTBYTES, IN1, IN1BYTES, IN2, IN2BYTES)                    \
     shake256_absorb_twice_squeeze(OUT, OUTBYTES, IN1, IN1BYTES, IN2, IN2BYTES)
 
-void shake256_absorb_twice_squeeze(uint8_t *out, size_t out_bytes,
-                                   const uint8_t *in1, size_t in1_bytes,
-                                   const uint8_t *in2, size_t in2_bytes);
+void shake256_absorb_twice_squeeze(uint8_t *out, unsigned long long out_bytes,
+                                   const uint8_t *in1, unsigned long long in1_bytes,
+                                   const uint8_t *in2, unsigned long long in2_bytes);
 
 
 

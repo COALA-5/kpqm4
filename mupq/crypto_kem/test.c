@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 or CC0-1.0
-#include "api.h"
 #include "randombytes.h"
 #include "hal.h"
+#include "api.h"
 
 #include <string.h>
 

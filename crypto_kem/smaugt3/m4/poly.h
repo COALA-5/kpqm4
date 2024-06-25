@@ -15,14 +15,14 @@ typedef struct {
 } polyvec;
 
 typedef struct {
-    uint8_t *sx;
+    uint8_t sx[97];
     uint8_t neg_start;
     uint8_t cnt;
 } sppoly; // sparse poly
 
 #define convToIdx SMAUG_NAMESPACE(convToIdx)
 uint8_t convToIdx(uint8_t *res, const uint8_t res_length, const uint8_t *op,
-                  const size_t op_length);
+                  const unsigned long long op_length);
 
 #define poly_mult_add SMAUG_NAMESPACE(poly_mult_add)
 void poly_mult_add(poly *res, const poly *op1, const sppoly *op2);

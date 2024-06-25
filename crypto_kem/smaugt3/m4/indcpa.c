@@ -9,19 +9,19 @@
  *
  * Arguments:   - uint8_t *r: pointer to ouptput vector r
  *              - uint8_t *input: pointer to input seed (of length input_size)
- *              - size_t input_size: length of input seed
+ *              - unsigned long long input_size: length of input seed
  *              - uint8_t * neg_start: pointer to output vector neg_start
  **************************************************/
 void genRx_vec(sppoly r[MODULE_RANK], const uint8_t *input,
-               const size_t input_size) {
+               const unsigned long long input_size) {
     uint8_t res[DIMENSION] = {0};
     uint8_t cnt_arr[MODULE_RANK] = {0};
 
     hwt(res, cnt_arr, input, input_size, HR);
 
-    for (size_t i = 0; i < MODULE_RANK; ++i) {
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i) {
         r[i].cnt = cnt_arr[i];
-        r[i].sx = (uint8_t *)malloc(cnt_arr[i] * sizeof(uint8_t));
+        //r[i].sx = (uint8_t *)malloc(cnt_arr[i] * sizeof(uint8_t));
         r[i].neg_start = convToIdx(r[i].sx, r[i].cnt, res + (i * LWE_N), LWE_N);
     }
 }
@@ -58,9 +58,9 @@ void indcpa_keypair(uint8_t pk[PUBLICKEY_BYTES],
     save_to_string_pk(pk, &pk_tmp);
     save_to_string_sk(sk, &sk_tmp);
 
-    for (size_t i = 0; i < MODULE_RANK; ++i) {
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i) {
         memset(sk_tmp.sp_vec[i].sx, 0, sk_tmp.sp_vec[i].cnt);
-        free(sk_tmp.sp_vec[i].sx);
+        //free(sk_tmp.sp_vec[i].sx);
     }
 }
 
@@ -86,7 +86,6 @@ void indcpa_enc(uint8_t ctxt[CIPHERTEXT_BYTES],
     uint8_t seed_r[DELTA_BYTES] = {0};
     public_key pk_tmp;
     load_from_string_pk(&pk_tmp, pk);
-    hal_send_str("load_from_string_pk end");
 
     // Compute a vector r = hwt(delta, H'(pk))
     sppoly r[MODULE_RANK];
@@ -97,21 +96,17 @@ void indcpa_enc(uint8_t ctxt[CIPHERTEXT_BYTES],
     else
         cmov(seed_r, seed, DELTA_BYTES, 1);
     genRx_vec(r, seed_r, DELTA_BYTES);
-    hal_send_str("genRx_vec end");
 
     // Compute c1(x), c2(x)
-    ciphertext ctxt_tmp;
+    ciphertext ctxt_tmp = {0};
     memset(&ctxt_tmp, 0, sizeof(ciphertext));
     computeC1(&(ctxt_tmp.c1), pk_tmp.A, r);
-    hal_send_str("computeC1 end");
     computeC2(&ctxt_tmp.c2, mu, &pk_tmp.b, r);
-    hal_send_str("computeC2 end");
 
+    
     save_to_string(ctxt, &ctxt_tmp);
-    hal_send_str("save_to_string end");
-    for (size_t i = 0; i < MODULE_RANK; ++i) {
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i) {
         memset(r[i].sx, 0, r[i].cnt);
-        free(r[i].sx);
     }
 }
 
@@ -145,8 +140,8 @@ void indcpa_dec(uint8_t delta[DELTA_BYTES],
     delta_temp = ctxt_tmp.c2;
     for (uint16_t i = 0; i < LWE_N; ++i)
         delta_temp.coeffs[i] <<= _16_LOG_P2;
-    for (size_t i = 0; i < MODULE_RANK; ++i)
-        for (size_t j = 0; j < LWE_N; ++j)
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i)
+        for (unsigned long long j = 0; j < LWE_N; ++j)
             c1_temp.vec[i].coeffs[j] <<= _16_LOG_P;
 
     // Compute delta = (delta + c1^T * s)
@@ -160,14 +155,14 @@ void indcpa_dec(uint8_t delta[DELTA_BYTES],
 
     // Set delta
     memset(delta, 0, DELTA_BYTES);
-    for (size_t i = 0; i < DELTA_BYTES; ++i) {
+    for (unsigned long long i = 0; i < DELTA_BYTES; ++i) {
         for (uint8_t j = 0; j < 8; ++j) {
             delta[i] ^= ((uint8_t)(delta_temp.coeffs[8 * i + j]) << j);
         }
     }
 
-    for (size_t i = 0; i < MODULE_RANK; ++i) {
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i) {
         memset(sk_tmp.sp_vec[i].sx, 0, sk_tmp.sp_vec[i].cnt);
-        free(sk_tmp.sp_vec[i].sx);
+        //free(sk_tmp.sp_vec[i].sx);
     }
 }

@@ -19,8 +19,8 @@ void computeC1(polyvec *c1, const polyvec A[MODULE_RANK],
     matrix_vec_mult_add(c1, A, r, 1);
 
     // Rounding q to p
-    for (size_t i = 0; i < MODULE_RANK; ++i) {
-        for (size_t j = 0; j < LWE_N; ++j) {
+    for (unsigned long long i = 0; i < MODULE_RANK; ++i) {
+        for (unsigned long long j = 0; j < LWE_N; ++j) {
             c1->vec[i].coeffs[j] =
                 ((c1->vec[i].coeffs[j] + RD_ADD) & RD_AND) >> _16_LOG_P;
         }
@@ -41,8 +41,8 @@ void computeC1(polyvec *c1, const polyvec A[MODULE_RANK],
 void computeC2(poly *c2, const uint8_t delta[DELTA_BYTES], const polyvec *b,
                const sppoly r[MODULE_RANK]) {
     // c2 = q/2 * delta
-    for (size_t i = 0; i < DELTA_BYTES; ++i) {
-        for (size_t j = 0; j < sizeof(uint8_t) * 8; ++j) {
+    for (unsigned long long i = 0; i < DELTA_BYTES; ++i) {
+        for (unsigned long long j = 0; j < sizeof(uint8_t) * 8; ++j) {
             c2->coeffs[8 * i + j] = (uint16_t)((delta[i] >> j) << _16_LOG_T);
         }
     }

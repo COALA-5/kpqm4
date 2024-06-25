@@ -11,7 +11,7 @@
  **************************************************/
 inline void __attribute__((always_inline))
 poly_add(uint16_t res[2 * LWE_N], const poly *op1, const uint8_t deg) {
-    for (size_t i = 0; i < LWE_N; ++i)
+    for (unsigned long long i = 0; i < LWE_N; ++i)
         res[deg + i] += op1->coeffs[i];
 }
 
@@ -26,7 +26,7 @@ poly_add(uint16_t res[2 * LWE_N], const poly *op1, const uint8_t deg) {
  **************************************************/
 inline void __attribute__((always_inline))
 poly_sub(uint16_t res[2 * LWE_N], const poly *op1, const uint8_t deg) {
-    for (size_t i = 0; i < LWE_N; ++i)
+    for (unsigned long long i = 0; i < LWE_N; ++i)
         res[deg + i] -= op1->coeffs[i];
 }
 
@@ -41,7 +41,7 @@ poly_sub(uint16_t res[2 * LWE_N], const poly *op1, const uint8_t deg) {
  **************************************************/
 inline void __attribute__((always_inline))
 poly_reduce(poly *res, const uint16_t temp[2 * LWE_N]) {
-    for (size_t j = 0; j < LWE_N; ++j) {
+    for (unsigned long long j = 0; j < LWE_N; ++j) {
         res->coeffs[j] += temp[j] - temp[j + LWE_N];
     }
 }
@@ -56,18 +56,18 @@ poly_reduce(poly *res, const uint16_t temp[2 * LWE_N]) {
  * Arguments:   - uint16_t *res: pointer to output polynomial
  *              - uint16_t *op1: pointer to first input polynomial
  *              - uint8_t *op2: pointer to second input polynomial
- *              - size_t op2_length: length of second input polynomial
+ *              - unsigned long long op2_length: length of second input polynomial
  *              - uint8_t neg_start: neg_start corresponding
  *                to second input polynomial
  **************************************************/
 void poly_mult_add(poly *res, const poly *op1, const sppoly *op2) {
     uint16_t temp[LWE_N * 2] = {0};
 
-    for (size_t j = 0; j < op2->neg_start; ++j) {
+    for (unsigned long long j = 0; j < op2->neg_start; ++j) {
         poly_add(temp, op1, (op2->sx)[j]);
     }
 
-    for (size_t j = op2->neg_start; j < op2->cnt; ++j) {
+    for (unsigned long long j = op2->neg_start; j < op2->cnt; ++j) {
         poly_sub(temp, op1, (op2->sx)[j]);
     }
     poly_reduce(res, temp);
@@ -83,18 +83,18 @@ void poly_mult_add(poly *res, const poly *op1, const sppoly *op2) {
  * Arguments:   - uint16_t *res: pointer to output polynomial
  *              - uint16_t *op1: pointer to first input polynomial
  *              - uint8_t *op2: pointer to second input polynomial
- *              - size_t op2_length: length of second input polynomial
+ *              - unsigned long long op2_length: length of second input polynomial
  *              - uint8_t neg_start: neg_start corresponding
  *                to second input polynomial
  **************************************************/
 void poly_mult_sub(poly *res, const poly *op1, const sppoly *op2) {
     uint16_t temp[LWE_N * 2] = {0};
 
-    for (size_t j = 0; j < op2->neg_start; ++j) {
+    for (unsigned long long j = 0; j < op2->neg_start; ++j) {
         poly_sub(temp, op1, (op2->sx)[j]);
     }
 
-    for (size_t j = op2->neg_start; j < op2->cnt; ++j) {
+    for (unsigned long long j = op2->neg_start; j < op2->cnt; ++j) {
         poly_add(temp, op1, (op2->sx)[j]);
     }
     poly_reduce(res, temp);
@@ -112,7 +112,7 @@ void poly_mult_sub(poly *res, const poly *op1, const sppoly *op2) {
  *              - uint8_t *op2: pointer to input polynomial vector
  *                (void * used for pointing uint8_t array with
  *                [MODULE_RANK][op2_length])
- *              - size_t op2_length: length of input polynomial vector
+ *              - unsigned long long op2_length: length of input polynomial vector
  *              - uint8_t neg_start: vector of negstart
  *                (each element of vector corresponds to the same index element
  *                in the input polynomial vector)
@@ -144,7 +144,7 @@ void matrix_vec_mult_add(polyvec *res, const polyvec op1[MODULE_RANK],
  *              - uint8_t *op2: pointer to input polynomial vector
  *                (void * used for pointing uint8_t array with
  *                [MODULE_RANK][op2_length])
- *              - size_t op2_length: length of polynomials
+ *              - unsigned long long op2_length: length of polynomials
  *                in input polynomial vector
  *              - uint8_t neg_start: vector of negstart (each element
  *corresponds to the same index element in the input polynomial vector)
@@ -177,7 +177,7 @@ void matrix_vec_mult_sub(polyvec *res, const polyvec op1[MODULE_RANK],
  *              - uint8_t *op2: pointer to second input polynomial vector
  *                (void * used for pointing uint8_t array with
  *                [MODULE_RANK][op2_length])
- *              - size_t op2_length: length of polynomials
+ *              - unsigned long long op2_length: length of polynomials
  *                in second input polynomial vector
  *              - uint8_t neg_start: vector of negstart (each element
  *corresponds to the same index element in the input polynomial vector)
@@ -198,19 +198,19 @@ void vec_vec_mult_add(poly *res, const polyvec *op1,
  *              coefficient -1.
  *
  * Arguments:   - uint16_t *res: pointer to output
- *              - size_t res_length: length of output
+ *              - unsigned long long res_length: length of output
  *              - uint8_t *op: pointer to input polynomial
- *              - size_t op_length: length of input polynomial
+ *              - unsigned long long op_length: length of input polynomial
  *
  * Returns neg_start(success) or 0(failure).
  **************************************************/
 uint8_t convToIdx(uint8_t *res, const uint8_t res_length, const uint8_t *op,
-                  const size_t op_length) {
+                  const unsigned long long op_length) {
     uint8_t index = 0, b = 0;
     uint8_t index_arr[2] = {0, res_length - 1}; // 0 for positive, 1 for
                                                 // negative
 
-    for (size_t i = 0; i < op_length; ++i) {
+    for (unsigned long long i = 0; i < op_length; ++i) {
         index = ((op[i] & 0x80) >> 7) & 0x01;
         b = (-(uint64_t)op[i]) >> 63;
         res[index_arr[index]] ^= (-b) & (res[index_arr[index]] ^ i);

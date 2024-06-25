@@ -11,7 +11,7 @@
 
 #define genRx_vec SMAUG_NAMESPACE(genRx_vec)
 void genRx_vec(sppoly r[MODULE_RANK], const uint8_t *input,
-               const size_t input_size);
+               const unsigned long long input_size);
 
 #define indcpa_keypair SMAUG_NAMESPACE(indcpa_keypair)
 void indcpa_keypair(uint8_t pk[PUBLICKEY_BYTES],
