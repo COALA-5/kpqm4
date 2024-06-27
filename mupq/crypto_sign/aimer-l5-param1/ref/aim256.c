@@ -10,6 +10,8 @@
 #include "aim_common.inc"
 #include "portable_endian.h"
 
+#include "hal.h"
+
 void mersenne_exp_3(const GF in, GF out);
 void mersenne_exp_5(const GF in, GF out);
 void mersenne_exp_7(const GF in, GF out);
@@ -282,61 +284,62 @@ void aim_mpc(const uint8_t* pt, const GF matrix_A[AIMER_NUM_INPUT_SBOXES][AIMER_
              const GF vector_b, const uint8_t* ct,
              const size_t num_parties, GF *z_shares, GF *x_shares)
 {
+  hal_send_str("entered aim_mpc\n");
   GF state[NUM_INPUT_SBOX] = {0,};
   GF ct_GF = {0,};
   GF temp = {0,};
   size_t party_index;
 
-  GF_from_bytes(ct, ct_GF);
+  // GF_from_bytes(ct, ct_GF);
   
 
   
-  for (size_t party = 0; party < num_parties; party++)
-  {
-    party_index = party * (NUM_INPUT_SBOX + 1);
+  // for (size_t party = 0; party < num_parties; party++)
+  // {
+    // party_index = party * (NUM_INPUT_SBOX + 1);
 
-    GF_from_bytes(pt + party * BLOCK_SIZE, x_shares[party_index]);
+    // GF_from_bytes(pt + party * BLOCK_SIZE, x_shares[party_index]);
 
-    // linear layer
-    GF_transposed_matmul(z_shares[party_index], matrix_A[0], state[0]);
-    GF_transposed_matmul(z_shares[party_index + 1], matrix_A[1], state[1]);
-    GF_transposed_matmul(z_shares[party_index + 2], matrix_A[2], state[2]);
+    // // linear layer
+    // GF_transposed_matmul(z_shares[party_index], matrix_A[0], state[0]);
+    // GF_transposed_matmul(z_shares[party_index + 1], matrix_A[1], state[1]);
+    // GF_transposed_matmul(z_shares[party_index + 2], matrix_A[2], state[2]);
 
-    if (party == 0)
-    {
-      GF_add(state[2], vector_b, state[2]);
-    }
-    GF_add(state[0], state[1], state[0]);
-    GF_add(state[0], state[2], x_shares[party_index + 3]);
+    // if (party == 0)
+    // {
+    //   GF_add(state[2], vector_b, state[2]);
+    // }
+    // GF_add(state[0], state[1], state[0]);
+    // GF_add(state[0], state[2], x_shares[party_index + 3]);
 
-    // optimization B.1.2 in eprint 2022/588
-    GF_copy(z_shares[party_index], state[0]);
-    GF_copy(z_shares[party_index + 1], state[1]);
-    GF_copy(z_shares[party_index + 2], state[2]);
+    // // optimization B.1.2 in eprint 2022/588
+    // GF_copy(z_shares[party_index], state[0]);
+    // GF_copy(z_shares[party_index + 1], state[1]);
+    // GF_copy(z_shares[party_index + 2], state[2]);
 
-    GF_sqr(x_shares[party_index], temp);
-    GF_sqr(temp, temp);
-    GF_sqr(temp, z_shares[party_index]);
+    // GF_sqr(x_shares[party_index], temp);
+    // GF_sqr(temp, temp);
+    // GF_sqr(temp, z_shares[party_index]);
 
-    GF_sqr(z_shares[party_index], temp);
-    GF_sqr(temp, temp);
-    GF_sqr(temp, temp);
-    GF_sqr(temp, z_shares[party_index + 2]);
+    // GF_sqr(z_shares[party_index], temp);
+    // GF_sqr(temp, temp);
+    // GF_sqr(temp, temp);
+    // GF_sqr(temp, z_shares[party_index + 2]);
 
-    GF_transposed_matmul(x_shares[party_index], e2_power_matrix,
-                         z_shares[party_index + 1]);
+    // GF_transposed_matmul(x_shares[party_index], e2_power_matrix,
+    //                      z_shares[party_index + 1]);
 
-    GF_copy(state[0], x_shares[party_index]);
-    GF_copy(state[1], x_shares[party_index + 1]);
-    GF_copy(state[2], x_shares[party_index + 2]);
+    // GF_copy(state[0], x_shares[party_index]);
+    // GF_copy(state[1], x_shares[party_index + 1]);
+    // GF_copy(state[2], x_shares[party_index + 2]);
 
-    GF_sqr(x_shares[party_index + 3], temp);
-    GF_sqr(temp, temp);
-    GF_sqr(temp, temp);
-    GF_sqr(temp, temp);
-    GF_sqr(temp, temp);
+    // GF_sqr(x_shares[party_index + 3], temp);
+    // GF_sqr(temp, temp);
+    // GF_sqr(temp, temp);
+    // GF_sqr(temp, temp);
+    // GF_sqr(temp, temp);
 
-    GF_mul(ct_GF, x_shares[party_index + 3], state[0]);
-    GF_add(temp, state[0], z_shares[party_index + 3]);
-  }
+    // GF_mul(ct_GF, x_shares[party_index + 3], state[0]);
+    // GF_add(temp, state[0], z_shares[party_index + 3]);
+  // }
 }
