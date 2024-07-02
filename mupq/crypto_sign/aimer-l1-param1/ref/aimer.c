@@ -196,130 +196,129 @@ int _aimer_sign(const aimer_instance_t*   instance,
     uint8_t* shared_pt_offset =
       repetition_shared_pt + (repetition * N * block_size);
 
-    hal_send_str("aim_mpc start...\n");
     aim_mpc(shared_pt_offset, matrix_A, vector_b, ct, N, shared_z_offset, shared_x_offset);
   }
 
-  // GF a = {0,};
-  // for (size_t repetition = 0; repetition < tau; repetition++)
-  // {
-  //   proof_t* proof = &sig->proofs[repetition];
+  GF a = {0,};
+  for (size_t repetition = 0; repetition < tau; repetition++)
+  {
+    proof_t* proof = &sig->proofs[repetition];
 
-  //   GF_set0(a);
-  //   GF_set0(proof->c_delta);
-  //   for (size_t party = 0; party < N; party++)
-  //   {
-  //     uint8_t* random_triple = random_tapes.tape +
-  //       ((repetition * N + party) * random_tape_size +
-  //         block_size + L * instance->field_size);
+    GF_set0(a);
+    GF_set0(proof->c_delta);
+    for (size_t party = 0; party < N; party++)
+    {
+      uint8_t* random_triple = random_tapes.tape +
+        ((repetition * N + party) * random_tape_size +
+          block_size + L * instance->field_size);
 
-  //     GF* a_share = repetition_shared_dot_a + (repetition * N + party);
-  //     GF_from_bytes(random_triple, a_share[0]);
-  //     GF_add(a, a_share[0], a);
+      GF* a_share = repetition_shared_dot_a + (repetition * N + party);
+      GF_from_bytes(random_triple, a_share[0]);
+      GF_add(a, a_share[0], a);
 
-  //     GF* c_share = repetition_shared_dot_c + (repetition * N + party);
-  //     GF_from_bytes(random_triple + instance->field_size, c_share[0]);
-  //     GF_add(proof->c_delta, c_share[0], proof->c_delta);
-  //   }
+      GF* c_share = repetition_shared_dot_c + (repetition * N + party);
+      GF_from_bytes(random_triple + instance->field_size, c_share[0]);
+      GF_add(proof->c_delta, c_share[0], proof->c_delta);
+    }
 
-  //   // Calculate c_delta = -c + a*b, c is negated above already
-  //   // Calculate c_delta that fixes the dot triple
-  //   GF_mul(a, pt_GF, a);
-  //   GF_add(a, proof->c_delta, proof->c_delta);
+    // Calculate c_delta = -c + a*b, c is negated above already
+    // Calculate c_delta that fixes the dot triple
+    GF_mul(a, pt_GF, a);
+    GF_add(a, proof->c_delta, proof->c_delta);
 
-  //   // Fix party 0's share
-  //   GF_add(repetition_shared_dot_c[repetition * N], proof->c_delta,
-  //          repetition_shared_dot_c[repetition * N]);
-  // }
+    // Fix party 0's share
+    GF_add(repetition_shared_dot_c[repetition * N], proof->c_delta,
+           repetition_shared_dot_c[repetition * N]);
+  }
 
-  // //////////////////////////////////////////////////////////////////////////////
-  // // Phase 2: Challenging the checking protocol.
-  // //////////////////////////////////////////////////////////////////////////////
-  // // Commit to salt, (all commitments of parties seeds,
-  // // pt_delta, z_delta, c_delta) for all repetitions
-  // GF epsilons[AIMER_T][AIMER_NUM_INPUT_SBOXES+1];
-  // h_1_commitment(instance, sig, public_key, message, message_len,
-  //                party_seed_commitments, sig->h_1);
+  //////////////////////////////////////////////////////////////////////////////
+  // Phase 2: Challenging the checking protocol.
+  //////////////////////////////////////////////////////////////////////////////
+  // Commit to salt, (all commitments of parties seeds,
+  // pt_delta, z_delta, c_delta) for all repetitions
+  GF epsilons[AIMER_T][AIMER_NUM_INPUT_SBOXES+1];
+  h_1_commitment(instance, sig, public_key, message, message_len,
+                 party_seed_commitments, sig->h_1);
 
-  // // Expand challenge hash to epsilon values
-  // h_1_expand(instance, sig->h_1, epsilons);
+  // Expand challenge hash to epsilon values
+  h_1_expand(instance, sig->h_1, epsilons);
 
-  // //////////////////////////////////////////////////////////////////////////////
-  // // Phase 3: Committing to the simulation of the checking protocol.
-  // //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  // Phase 3: Committing to the simulation of the checking protocol.
+  //////////////////////////////////////////////////////////////////////////////
 
-  // GF repetition_alpha_shares[AIMER_T*AIMER_N];
-  // GF v_shares[AIMER_T][AIMER_N];
+  GF repetition_alpha_shares[AIMER_T*AIMER_N];
+  GF v_shares[AIMER_T][AIMER_N];
 
-  // GF alpha = {0,}, pt_share = {0,}, temp = {0,};
-  // for (size_t repetition = 0; repetition < tau; repetition++)
-  // {
-  //   GF* x_shares     = repetition_shared_x     + (repetition * N) * (L + 1);
-  //   GF* z_shares     = repetition_shared_z     + (repetition * N) * (L + 1);
-  //   GF* dot_a_share  = repetition_shared_dot_a + (repetition * N);
-  //   GF* dot_c_share  = repetition_shared_dot_c + (repetition * N);
-  //   GF* alpha_share  = repetition_alpha_shares + (repetition * N);
+  GF alpha = {0,}, pt_share = {0,}, temp = {0,};
+  for (size_t repetition = 0; repetition < tau; repetition++)
+  {
+    GF* x_shares     = repetition_shared_x     + (repetition * N) * (L + 1);
+    GF* z_shares     = repetition_shared_z     + (repetition * N) * (L + 1);
+    GF* dot_a_share  = repetition_shared_dot_a + (repetition * N);
+    GF* dot_c_share  = repetition_shared_dot_c + (repetition * N);
+    GF* alpha_share  = repetition_alpha_shares + (repetition * N);
 
-  //   // Execute sacrificing check protocol
-  //   // alpha = eps_i * x_i + a
-  //   GF_set0(alpha);
-  //   for (size_t party = 0; party < N; party++)
-  //   {
-  //     GF_mul(x_shares[party * (L + 1)], epsilons[repetition][0], temp);
-  //     GF_add(dot_a_share[party], temp, alpha_share[party]);
-  //     for (size_t ell = 1; ell < (L + 1); ell++)
-  //     {
-  //       GF_mul(x_shares[party * (L + 1) + ell], epsilons[repetition][ell], temp);
-  //       GF_add(alpha_share[party], temp, alpha_share[party]);
-  //     }
-  //     GF_add(alpha, alpha_share[party], alpha);
-  //   }
+    // Execute sacrificing check protocol
+    // alpha = eps_i * x_i + a
+    GF_set0(alpha);
+    for (size_t party = 0; party < N; party++)
+    {
+      GF_mul(x_shares[party * (L + 1)], epsilons[repetition][0], temp);
+      GF_add(dot_a_share[party], temp, alpha_share[party]);
+      for (size_t ell = 1; ell < (L + 1); ell++)
+      {
+        GF_mul(x_shares[party * (L + 1) + ell], epsilons[repetition][ell], temp);
+        GF_add(alpha_share[party], temp, alpha_share[party]);
+      }
+      GF_add(alpha, alpha_share[party], alpha);
+    }
 
-  //   // v^i = - c^i + dot(alpha, y^i) - dot(eps, z^i)
-  //   for (size_t party = 0; party < N; party++)
-  //   {
-  //     GF_from_bytes(repetition_shared_pt +
-  //                   (repetition * N + party) * instance->field_size,
-  //                   pt_share);
+    // v^i = - c^i + dot(alpha, y^i) - dot(eps, z^i)
+    for (size_t party = 0; party < N; party++)
+    {
+      GF_from_bytes(repetition_shared_pt +
+                    (repetition * N + party) * instance->field_size,
+                    pt_share);
 
-  //     GF_mul(alpha, pt_share, temp);
-  //     GF_add(dot_c_share[party], temp, v_shares[repetition][party]);
-  //     for (size_t ell = 0; ell < (L + 1); ell++)
-  //     {
-  //       GF_mul(epsilons[repetition][ell], z_shares[party * (L + 1) + ell], temp);
-  //       GF_add(v_shares[repetition][party], temp, v_shares[repetition][party]);
-  //     }
-  //   }
-  // }
+      GF_mul(alpha, pt_share, temp);
+      GF_add(dot_c_share[party], temp, v_shares[repetition][party]);
+      for (size_t ell = 0; ell < (L + 1); ell++)
+      {
+        GF_mul(epsilons[repetition][ell], z_shares[party * (L + 1) + ell], temp);
+        GF_add(v_shares[repetition][party], temp, v_shares[repetition][party]);
+      }
+    }
+  }
 
-  // //////////////////////////////////////////////////////////////////////////////
-  // // Phase 4: Challenging the views of the MPC protocol.
-  // //////////////////////////////////////////////////////////////////////////////
-  // h_2_commitment(instance, sig->salt, sig->h_1, repetition_alpha_shares,
-  //                v_shares, sig->h_2);
+  //////////////////////////////////////////////////////////////////////////////
+  // Phase 4: Challenging the views of the MPC protocol.
+  //////////////////////////////////////////////////////////////////////////////
+  h_2_commitment(instance, sig->salt, sig->h_1, repetition_alpha_shares,
+                 v_shares, sig->h_2);
 
-  // uint16_t missing_parties[AIMER_T];
-  // h_2_expand(instance, sig->h_2, missing_parties);
+  uint16_t missing_parties[AIMER_T];
+  h_2_expand(instance, sig->h_2, missing_parties);
 
-  // //////////////////////////////////////////////////////////////////////////////
-  // // Phase 5: Opening the views of the MPC and checking protocols.
-  // //////////////////////////////////////////////////////////////////////////////
-  // // Build signature
-  // for (size_t repetition = 0; repetition < tau; repetition++)
-  // {
-  //   proof_t* proof = &sig->proofs[repetition];
+  //////////////////////////////////////////////////////////////////////////////
+  // Phase 5: Opening the views of the MPC and checking protocols.
+  //////////////////////////////////////////////////////////////////////////////
+  // Build signature
+  for (size_t repetition = 0; repetition < tau; repetition++)
+  {
+    proof_t* proof = &sig->proofs[repetition];
 
-  //   size_t missing_party = missing_parties[repetition];
-  //   reveal_all_but(&proof->reveal_list, &seed_trees[repetition], missing_party);
+    size_t missing_party = missing_parties[repetition];
+    reveal_all_but(&proof->reveal_list, &seed_trees[repetition], missing_party);
 
-  //   memcpy(proof->missing_commitment,
-  //          party_seed_commitments +
-  //          ((repetition * N + missing_party) * digest_size),
-  //          digest_size);
+    memcpy(proof->missing_commitment,
+           party_seed_commitments +
+           ((repetition * N + missing_party) * digest_size),
+           digest_size);
 
-  //   GF_copy(repetition_alpha_shares[repetition * N + missing_party],
-  //           proof->missing_alpha_share);
-  // }
+    GF_copy(repetition_alpha_shares[repetition * N + missing_party],
+            proof->missing_alpha_share);
+  }
 
   return ret;
 }
