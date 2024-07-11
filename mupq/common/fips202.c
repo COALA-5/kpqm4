@@ -900,6 +900,9 @@ void shake256_absorb_once_kpqc(shake256incctx *state, const uint8_t *in, size_t 
   shake256_inc_finalize(state);
 }
 
+// omuk ncc sign
+
+
 // static uint64_t load64(const uint8_t x[8]) {
 //     unsigned int i;
 //     uint64_t r = 0;

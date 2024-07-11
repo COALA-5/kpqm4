@@ -4,10 +4,10 @@
 #include "packing.h"
 #include "poly.h"
 #include "randombytes.h"
-#include "symmetric.h"
 #include "fips202.h"
 #include "stdio.h"
 #include <stdlib.h>
+#include "symmetric.h"
 
 int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
 	uint8_t zeta[SEEDBYTES];

@@ -37,6 +37,10 @@ int main(void)
 
   hal_send_str("==========================");
 
+    unsigned long long keygen = 0;
+    unsigned long long encap = 0;
+    unsigned long long decap = 0;
+
   for(i=0;i<MUPQ_ITERATIONS; i++)
   {
     // Key-pair generation
@@ -50,12 +54,14 @@ int main(void)
 #endif
     t1 = hal_get_time();
     printcycles("keypair cycles:", t1-t0);
+    keygen += (t1 - t0);
 
     // Encapsulation
     t0 = hal_get_time();
     MUPQ_crypto_kem_enc(ct, key_a, pk);
     t1 = hal_get_time();
     printcycles("encaps cycles:", t1-t0);
+    encap += (t1 - t0);
 
     // Decapsulation
     t0 = hal_get_time();
@@ -68,6 +74,7 @@ int main(void)
 #endif
     t1 = hal_get_time();
     printcycles("decaps cycles:", t1-t0);
+    decap += (t1 - t0);
 
     if (memcmp(key_a, key_b, MUPQ_CRYPTO_BYTES)) {
       hal_send_str("ERROR KEYS\n");
@@ -77,6 +84,14 @@ int main(void)
     }
     hal_send_str("+");
   }
+
+    keygen /= MUPQ_ITERATIONS;
+    encap /= MUPQ_ITERATIONS;
+    decap /= MUPQ_ITERATIONS;
+
+  printcycles("keygen avg:", (int)(keygen));
+  printcycles("encap avg:", (int)(encap));
+  printcycles("decap avg:", (int)(decap));
 
   hal_send_str("#");
 

@@ -181,4 +181,8 @@ void sha3_512(uint8_t *output, const uint8_t *input, size_t inlen);
 void shake256_absorb_once_kpqc(shake256incctx *state, const uint8_t *in, size_t inlen);
 // void shake128_absorb_once_kpqc(shake128incctx *state, const uint8_t *in, size_t inlen);
 // void shake256_absorb_once_kpqc(shake256incctx *state, const uint8_t *in, size_t inlen);
+
+
+// for omuk ncc sign
+
 #endif

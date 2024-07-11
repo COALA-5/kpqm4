@@ -42,8 +42,13 @@ int main(void)
 
   hal_send_str("==========================");
 
+    unsigned long long keygen = 0;
+    unsigned long long sign = 0;
+    unsigned long long verify = 0;
+
   for(i=0;i<MUPQ_ITERATIONS; i++)
   {
+
     // Key-pair generation
     t0 = hal_get_time();
 #ifdef KPQM4_MQSIGN
@@ -57,6 +62,7 @@ int main(void)
 #endif
     t1 = hal_get_time();
     printcycles("keypair cycles:", t1-t0);
+    keygen += (t1 - t0);
 
     // Signing
     t0 = hal_get_time();
@@ -67,15 +73,25 @@ int main(void)
 #endif
     t1 = hal_get_time();
     printcycles("sign cycles:", t1-t0);
+    sign += (t1 - t0);
 
     // Verification
     t0 = hal_get_time();
     MUPQ_crypto_sign_open(sm, &smlen, sm, smlen, pk);
     t1 = hal_get_time();
     printcycles("verify cycles:", t1-t0);
+    verify += (t1 - t0);
 
     hal_send_str("+");
   }
+
+    keygen /= MUPQ_ITERATIONS;
+    sign /= MUPQ_ITERATIONS;
+    verify /= MUPQ_ITERATIONS;
+
+  printcycles("keygen avg:", (int)(keygen));
+  printcycles("sign avg:", (int)(sign));
+  printcycles("verify avg:", (int)(verify));
   hal_send_str("#");
   return 0;
 }
