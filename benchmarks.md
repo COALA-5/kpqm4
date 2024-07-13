@@ -18,9 +18,9 @@
 | AIMer-l1  |       ref      |     396445      |        33421937        |        32114337        |
 | AIMer-l3  |       ref      |     986245      |        92869260        |        89976575        |
 | AIMer-l5  |     memopt     |     3335884     |        234960280       |        171489263       |
-|  HAETAE2  |       ref      |     11045355    |        40240838        |        1110836         |
-|  HAETAE3  |       ref      |     11036822    |        44639256        |        2006013         |
-|  HAETAE5  |       ref      |     2967436     |        82540938        |        2486326         |
+|  HAETAE2  |       ref      |     1549086     |        4829742         |        976956          |
+|  HAETAE3  |       ref      |     4559001     |        7607057         |        1867887         |
+|  HAETAE5  |       ref      |     7437044     |        9492716         |        2486326         |
 | NCC-Sign2 |       ref      |     1448306     |        5257637         |        2359179         |
 | NCC-Sign3 |       ref      |     1893599     |        9245980         |        2965231         |
 | NCC-Sign5 |       ref      |     2897092     |        12046625        |        4731909         |
@@ -29,7 +29,7 @@
 # Memory Usage
 ## Key Encapsulation Schemes
 
-|  scheme   | implementation | Keygen [cycles] | Encapsulation [cycles] | Decapsulation [cycles] | 
+|  scheme   | implementation | Keygen [bytes]  | Encapsulation [bytes]  | Decapsulation [bytes]  | 
 |:---------:|:--------------:|:---------------:|:----------------------:|:----------------------:|
 | SMAUG-T1  |       ref      |      5176       |          6848          |          7616          |
 | SMAUG-T3  |       ref      |      10452      |          12652         |          12652         |
@@ -41,7 +41,7 @@
 
 ## Digital Signature Schemes
 
-|  scheme   | implementation | Keygen [cycles] |      Sign [cycles]     |     Verify [cycles]    | 
+|  scheme   | implementation | Keygen [bytes]  |      Sign [bytes]      |     Verify [bytes]     | 
 |:---------:|:--------------:|:---------------:|:----------------------:|:----------------------:|
 | AIMer-l1  |       ref      |      10952      |         187756         |         196712         |
 | AIMer-l3  |       ref      |      23864      |         413972         |         435632         |
