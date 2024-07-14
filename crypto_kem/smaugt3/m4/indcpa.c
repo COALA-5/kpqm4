@@ -77,7 +77,6 @@ void indcpa_keypair(uint8_t pk[PUBLICKEY_BYTES],
  *              - uint8_t *delta: pointer to input random delta (of length
  *                DELTA_BYTES) to deterministically generate all randomness
  **************************************************/
-#include "hal.h"
 void indcpa_enc(uint8_t ctxt[CIPHERTEXT_BYTES],
                 const uint8_t pk[PUBLICKEY_BYTES],
                 const uint8_t mu[DELTA_BYTES],

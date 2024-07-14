@@ -1,39 +1,8 @@
 #include "io.h"
-#include "hal.h"
 
 void save_to_string(uint8_t *output, const ciphertext *ctxt) {
     Rp_vec_to_bytes(output, &(ctxt->c1));
-
-    //! YB code Start
-    // for (int cnt_i = 0 ; cnt_i < MODULE_RANK ; cnt_i ++)
-    // {
-    //     for(int cnt_j = 0 ; cnt_j < 256 ; cnt_j ++)
-    //     {
-    //         output[cnt_i * 256 + cnt_j] = cnt_j;
-    //     }        
-    //     hal_send_str("Rp_vec_to_bytes - for loop");
-    // }
-    
-    // // memset(output, 0, sizeof(uint8_t) * CTPOLY1_BYTES);
-    // // for (int i = 0; i < 256; ++i) {
-    // //     memcpy(&(output[i]), ctxt->c1.vec + i, sizeof(uint8_t));
-    // // }
-    //Rp_to_bytes(bytes + i * CTPOLY1_BYTES, &(data->vec[i]));
-
-    //! YB code End
-
     Rp2_to_bytes(output + CTPOLYVEC_BYTES, &(ctxt->c2));
-
-    // for (int i = 0; i < MODULE_RANK; i++) {
-    //     for (int j = 0; j < sizeof(poly); j++) {
-    //         output[i] = ctxt->c1.vec[i].coeffs[j];
-    //     }
-    //     hal_send_str("for loop");
-    // }
-    // for (int i = 0; i < sizeof(poly); i++) {
-    //     output[i + CTPOLYVEC_BYTES] = (uint8_t)ctxt->c2.coeffs[i];
-    //     hal_send_str("for loop    2 ");
-    // }
 }
 
 void save_to_file(char *file_path, const uint8_t *ctxt) {

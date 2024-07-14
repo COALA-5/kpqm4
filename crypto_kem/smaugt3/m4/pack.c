@@ -1,6 +1,5 @@
 #include "pack.h"
 #include <stdlib.h>
-#include "hal.h"
 
 /*************************************************
  * Name:        Rq_to_bytes
@@ -191,13 +190,8 @@ void bytes_to_Rq_mat(polyvec data[MODULE_RANK],
  **************************************************/
 void Rp_to_bytes(uint8_t bytes[CTPOLY1_BYTES], const poly *data) {
     memset(bytes, 0, sizeof(uint8_t) * CTPOLY1_BYTES);
-    // for (int i = 0; i < CTPOLY1_BYTES; i++) {
-    //     hal_send_str("memset start...");
-    //     bytes[i] = 0;
-    // }
     for (int i = 0; i < 256; ++i) {
         memcpy(&(bytes[i]), &(data->coeffs[i]), sizeof(uint8_t));
-        //bytes[i]=data->coeffs[i];
     }
 }
 
@@ -317,9 +311,7 @@ void bytes_to_Rp2(poly *data, const uint8_t bytes[CTPOLY2_BYTES]) {
  **************************************************/
 void Rp_vec_to_bytes(uint8_t bytes[CTPOLYVEC_BYTES], const polyvec *data) {
     for (unsigned long long i = 0; i < MODULE_RANK; ++i){
-         
         Rp_to_bytes(bytes + i * CTPOLY1_BYTES, &(data->vec[i]));
-        //hal_send_str("Rp_vec_to_bytes - for loop");
     }
 }
 

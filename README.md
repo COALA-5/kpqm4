@@ -61,7 +61,8 @@ make -j16 PLATFORM=nucleo-l4r5zi
 ## Future Works
 - [ ] Make a table contains each size of pk, sk, ct/sig
 - [X] Write builing steps
-- [ ] Add hashing evaulations
+- [X] Add hashing evaulations
+- [ ] Add max/min/median clock cycles (only shows average clock cycles for now)
 - [ ] ... and more
 
 

@@ -21,7 +21,6 @@ static void printbytes(const unsigned char *x, unsigned long long xlen)
   for(i=0;i<xlen;i++)
     sprintf(outs+2*i, "%02x", x[i]);
   outs[2*xlen] = 0;
-  hal_send_str(outs);
 }
 
 void genRx_vec(sppoly r[MODULE_RANK], const uint8_t *input,
