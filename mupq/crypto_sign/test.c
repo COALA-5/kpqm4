@@ -95,7 +95,7 @@ static int test_sign(void)
         #include "_keys.h"
         uint8_t seed[32] = {0,};
         uint8_t salt_src[32] = {0,};
-        pk = _PK;
+        //pk = _PK;
         sk = _SK;
         hal_send_str("entering mqlr keypair");
         //MUPQ_crypto_sign_keypair(pk+8, sk+8, seed);

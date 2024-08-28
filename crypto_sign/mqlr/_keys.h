@@ -1,3 +1,5 @@
+#include "_pk.inc"
+
 extern const unsigned char* PK_0;
 
 unsigned char* _PK = PK_0;

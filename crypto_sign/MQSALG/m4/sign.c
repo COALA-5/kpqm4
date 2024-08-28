@@ -19,6 +19,7 @@
 #include "hal.h"
 #include "_keys.h"
 
+
 //extern unsigned char* PK_0;
 
 static void printbytes(const unsigned char *x, unsigned long long xlen)
@@ -36,9 +37,9 @@ crypto_sign_keypair(unsigned char *pk, unsigned char *sk, unsigned char *sk_seed
 {
 	hal_send_str("enter generate_keypair_mqlr");
 	//pk = _PK;
-	printbytes(pk + _PUB_KEY_LEN-100, 100);
+	//printbytes(pk + _PUB_KEY_LEN-100, 100);
 	sk = _SK;
-	printbytes(sk + _SEC_KEY_LEN-100, 100);
+	//printbytes(sk + _SEC_KEY_LEN-100, 100);
 	int r = 0;
 	//r = generate_keypair_mqlr((pk_mqs*)pk, (sk_mqlr*)sk, sk_seed);
 
@@ -49,13 +50,11 @@ crypto_sign_keypair(unsigned char *pk, unsigned char *sk, unsigned char *sk_seed
 int
 crypto_sign(unsigned char *sm, unsigned long long *smlen, const unsigned char *m, unsigned long long mlen, const unsigned char *sk, const uint8_t* sk_seed, const uint8_t *ss)
 {	
-	hal_send_str("aaa");
-	unsigned char a[1] = {0};
-	hal_send_str("aaa");
-	a[0] = _PK[0];
-	hal_send_str("aaa");
-	printbytes(a, 1);
-	hal_send_str("aaa");
+	printbytes(PK_DAT_0, 48);
+	printbytes(PK_DAT_3000, 48);
+	printbytes(PK_DAT_7020, 48);
+	printbytes(PK_DAT_7139, 48); 
+	printbytes(PK_DAT_7140, 16);
 	unsigned char digest[_HASH_LEN];
 
 	hash_msg( digest , _HASH_LEN , m , mlen );
