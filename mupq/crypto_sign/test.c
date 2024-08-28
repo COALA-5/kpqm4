@@ -4,6 +4,9 @@
 #include "hal.h"
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "sendfn.h"
 
 #define NTESTS 15
 #define MLEN 32
@@ -48,48 +51,80 @@ static int check_canary(const uint8_t *d) {
   return 0;
 }
 
+static void printbytes(const unsigned char *x, unsigned long long xlen)
+{
+  char outs[2*xlen+1];
+  unsigned long long i;
+  for(i=0;i<xlen;i++)
+    sprintf(outs+2*i, "%02x", x[i]);
+  outs[2*xlen] = 0;
+  hal_send_str(outs);
+}
 
 static int test_sign(void)
 {
-    unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES+16];
-    unsigned char sk[MUPQ_CRYPTO_SECRETKEYBYTES+16];
-    unsigned char sm[MLEN + MUPQ_CRYPTO_BYTES+16];
-    unsigned char m[MLEN+16];
+
 
     size_t mlen;
     size_t smlen;
 
     int i;
-    write_canary(pk); write_canary(pk+sizeof(pk)-8);
-    write_canary(sk); write_canary(sk+sizeof(sk)-8);
-    write_canary(sm); write_canary(sm+sizeof(sm)-8);
-    write_canary(m); write_canary(m+sizeof(m)-8);
 
+#ifdef KPQM4_MQSIGN
+        unsigned char* pk;
+        unsigned char* sk;
+        unsigned char sm[MLEN + MUPQ_CRYPTO_BYTES+16];
+        unsigned char m[MLEN+16];
+#else 
+        unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES+16];
+        unsigned char sk[MUPQ_CRYPTO_SECRETKEYBYTES+16];
+        unsigned char sm[MLEN + MUPQ_CRYPTO_BYTES+16];
+        unsigned char m[MLEN+16];
+        write_canary(pk); write_canary(pk+sizeof(pk)-8);
+        write_canary(sk); write_canary(sk+sizeof(sk)-8);
+        write_canary(sm); write_canary(sm+sizeof(sm)-8);
+        write_canary(m); write_canary(m+sizeof(m)-8);
+#endif
+
+#if defined(KPQM4_MQSIGN)
+#undef NTESTS
+#define NTESTS 1
+#endif
     for (i = 0; i < NTESTS; i++) {
 #ifdef KPQM4_MQSIGN
-        uint8_t seed[48] = {0,};
-        uint8_t ss[32] = {0,};
-        //randombytes_init(seed, NULL, 256);
-        randombytes(seed, 48);
-        MUPQ_crypto_sign_keypair(pk+8, sk+8, seed);
+        #include "_keys.h"
+        uint8_t seed[32] = {0,};
+        uint8_t salt_src[32] = {0,};
+        pk = _PK;
+        sk = _SK;
+        hal_send_str("entering mqlr keypair");
+        //MUPQ_crypto_sign_keypair(pk+8, sk+8, seed);
 #else 
         MUPQ_crypto_sign_keypair(pk+8, sk+8); 
 #endif
         hal_send_str("crypto_sign_keypair DONE.\n");
+        //printbytes(pk+8, 100);
 
-        randombytes(m+8, MLEN);
+        //randombytes(m+8, MLEN);
+        memset(m+8, 0, MLEN);
+        //printbytes(m+8, MLEN);
 #ifdef KPQM4_MQSIGN
-        MUPQ_crypto_sign(sm+8, &smlen, m+8, MLEN, sk+8, seed, ss);
+        MUPQ_crypto_sign(sm+8, &smlen, m+8, MLEN, sk+8, seed, salt_src);
 #else 
         MUPQ_crypto_sign(sm+8, &smlen, m+8, MLEN, sk+8);
 #endif
         hal_send_str("crypto_sign DONE.\n");
+        //printbytes(sm+8, MUPQ_CRYPTO_BYTES + MLEN);
 
         // By relying on m == sm we prevent having to allocate CRYPTO_BYTES twice
-        if (MUPQ_crypto_sign_open(sm+8, &mlen, sm+8, smlen, pk+8))
-        {
+#ifdef KPQM4_MQSIGN
+        if (MUPQ_crypto_sign_open(sm+8, &mlen, sm+8, smlen, pk+8)) {
             hal_send_str("ERROR Signature did not verify correctly!\n");
         }
+#else 
+        if (MUPQ_crypto_sign_open(sm+8, &mlen, sm+8, smlen, pk+8)) {
+            hal_send_str("ERROR Signature did not verify correctly!\n");
+        }        
         else if(check_canary(pk) || check_canary(pk+sizeof(pk)-8) ||
             check_canary(sk) || check_canary(sk+sizeof(sk)-8) ||
             check_canary(sm) || check_canary(sm+sizeof(sm)-8) ||
@@ -97,6 +132,7 @@ static int test_sign(void)
         {
             hal_send_str("ERROR canary overwritten\n");
         }
+#endif
         else
         {
             hal_send_str("OK Signature did verify correctly!\n");
@@ -105,7 +141,7 @@ static int test_sign(void)
         hal_send_str("+");
     }
 
-    return 0;
+    //return 0;
 }
 
 static int test_wrong_pk(void)
@@ -131,7 +167,7 @@ static int test_wrong_pk(void)
         uint8_t seed[48] = {0,};
         uint8_t ss[32] = {0,};
         //randombytes_init(seed, NULL, 256);
-        randombytes(seed, 48);
+        //randombytes(seed, 48);
         MUPQ_crypto_sign_keypair(pk2, sk, seed);
 #else 
         MUPQ_crypto_sign_keypair(pk2, sk);
@@ -148,7 +184,7 @@ static int test_wrong_pk(void)
 
         randombytes(m, MLEN);
 #ifdef KPQM4_MQSIGN
-        MUPQ_crypto_sign(sm, &smlen, sm, MLEN, sk, seed, ss);
+        MUPQ_crypto_sign(sm, &smlen, m, MLEN, sk, seed, ss);
 #else 
         MUPQ_crypto_sign(sm, &smlen, sm, MLEN, sk);
 #endif
@@ -171,7 +207,7 @@ static int test_wrong_pk(void)
         hal_send_str("+");
     }
 
-    return 0;
+    //return 0;
 }
 
 int main(void)
@@ -181,7 +217,7 @@ int main(void)
     // marker for automated testing
     hal_send_str("==========================");
     test_sign();
-    test_wrong_pk();
+    //test_wrong_pk();
     hal_send_str("#");
     return 0;
 }

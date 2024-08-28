@@ -2,11 +2,18 @@ EXTERN(vector_table)
 ENTRY(reset_handler)
 MEMORY
 {
- rom (rx) : ORIGIN = 0x08000000, LENGTH = 2048K
- ram (rwx) : ORIGIN = 0x20000000, LENGTH = 640K
+ rom (rx)    : ORIGIN = 0x08000000, LENGTH = 1024K
+ fdata (rwx) : ORIGIN = 0x08100000, LENGTH = 1024K
+ ram (rwx)   : ORIGIN = 0x20000000, LENGTH = 640K
 }
 SECTIONS
 {
+ .flash_pk :
+  { 
+    . = ALIGN(4);
+     KEEP(*(.flash_pk))
+    . = ALIGN(4);
+  } > fdata
  .text : {
   *(.vectors)
   . = ALIGN(448);
