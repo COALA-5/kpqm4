@@ -1,3 +1,9 @@
+# Important Notification
+- The asterisk(*) means that the algorithm is __not benchmarked__ via kpqm4 framework.
+    - Those algorithms are benchmarked with STM32CubeIDE, and __keys are flashed in flash memory__. (.text section)
+    - Also those keys are pre-generated, so the __keypair function is not benchmarked__.
+
+
 # Benchmarks
 ## Key Encapsulation Schemes
 
@@ -10,7 +16,7 @@
 | NTRU+768  |       ref      |      846023     |         540297         |         744154         |
 | NTRU+864  |       ref      |      903049     |         591688         |         832962         |
 | NTRU+1152 |       ref      |     2161362     |         800569         |        1169875         |
-| PALOMA128 |   ref(flash)   |        -        |        3087378         |        3811089         |
+| PALOMA128*|   ref(flash)   |        -        |        3087378         |        3811089         |
 
 ## Digital Signature Schemes
 
@@ -33,7 +39,7 @@
 |   NCC-Sign3    |       m4f      |     1305061     |        4356339         |        1585031         |
 |   NCC-Sign5    |       ref      |     2897092     |        12046625        |        4731909         |
 |   NCC-Sign5    |       m4f      |     1965693     |        5821410         |        2447042         |
-| MQ-Sign-LR-128 |   ref(flash)   |        -        |       54269062         |        81148106        |
+| MQ-Sign-LR-128*|   ref(flash)   |        -        |       54269062         |        81148106        |
 
 
 # Memory Usage
