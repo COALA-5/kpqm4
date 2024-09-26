@@ -2,7 +2,9 @@
 - The asterisk(*) means that the algorithm is __not benchmarked__ via kpqm4 framework.
     - Those algorithms are benchmarked with STM32CubeIDE, and __keys are flashed in flash memory__. (.text section)
     - Also those keys are pre-generated, so the __keypair function is not benchmarked__.
-
+    - The algorithms with asterisk are benchmarked with STM32429I-EVAL1 board.
+- Other algorithms are benchmarked with NUCLEO-L4R5ZI board, using kpqm4 framework.
+- Both of optimization option are the same, used -O3 option.
 
 # Benchmarks
 ## Key Encapsulation Schemes
