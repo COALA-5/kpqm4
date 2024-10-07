@@ -87,9 +87,8 @@ int randombytes(uint8_t *x, size_t xlen)
 int main(void)
 {
   unsigned char key_a[MUPQ_CRYPTO_BYTES], key_b[MUPQ_CRYPTO_BYTES];
-  unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
+
   unsigned char sendb[MUPQ_CRYPTO_CIPHERTEXTBYTES];
-  unsigned char sk_a[MUPQ_CRYPTO_SECRETKEYBYTES];
   unsigned int i,j;
 
   hal_setup(CLOCK_FAST);
@@ -100,15 +99,15 @@ int main(void)
   {
     // Key-pair generation
 #ifdef KPQM4_PALOMA
-    gf2m_tab table;
-    gen_precomputation_tab(&table);
-    MUPQ_crypto_kem_keypair(pk, sk_a, &table);
+#include "key.h"
 #else
-    MUPQ_crypto_kem_keypair(pk, sk_a);
+    unsigned char sk[MUPQ_CRYPTO_SECRETKEYBYTES];
+    unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
+    MUPQ_crypto_kem_keypair(pk, sk);
 #endif
 
     printbytes(pk,MUPQ_CRYPTO_PUBLICKEYBYTES);
-    printbytes(sk_a,MUPQ_CRYPTO_SECRETKEYBYTES);
+    printbytes(sk,MUPQ_CRYPTO_SECRETKEYBYTES);
 
     // Encapsulation
     MUPQ_crypto_kem_enc(sendb, key_b, pk);
@@ -118,11 +117,11 @@ int main(void)
 
     // Decapsulation
 #if defined (KPQM4_PALOMA)
-    MUPQ_crypto_kem_dec(key_a, sendb, sk_a, &table);
+    MUPQ_crypto_kem_dec(key_a, sendb, sk);
 #elif defined (KPQM4)
-    MUPQ_crypto_kem_dec(key_a, sk_a, pk, sendb);
+    MUPQ_crypto_kem_dec(key_a, sk, pk, sendb);
 #else
-    MUPQ_crypto_kem_dec(key_a, sendb, sk_a);
+    MUPQ_crypto_kem_dec(key_a, sendb, sk);
 #endif
 
     printbytes(key_a,MUPQ_CRYPTO_BYTES);

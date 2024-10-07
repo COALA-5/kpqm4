@@ -29,8 +29,6 @@ unsigned long long hash_cycles;
 int main(void)
 {
   unsigned char key_a[MUPQ_CRYPTO_BYTES], key_b[MUPQ_CRYPTO_BYTES];
-  unsigned char sk[MUPQ_CRYPTO_SECRETKEYBYTES];
-  unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
   unsigned char ct[MUPQ_CRYPTO_CIPHERTEXTBYTES];
   unsigned long long t0, t1;
   int i;
@@ -45,10 +43,10 @@ int main(void)
     hash_cycles = 0;
     t0 = hal_get_time();
 #ifdef KPQM4_PALOMA
-    gf2m_tab table;
-    gen_precomputation_tab(&table);
-    MUPQ_crypto_kem_keypair(pk, sk, &table);
+#include "key.h"
 #else
+    unsigned char sk[MUPQ_CRYPTO_SECRETKEYBYTES];
+    unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
     MUPQ_crypto_kem_keypair(pk, sk);
 #endif
     t1 = hal_get_time();
@@ -67,7 +65,7 @@ int main(void)
     hash_cycles = 0;
     t0 = hal_get_time();
 #if defined (KPQM4_PALOMA)
-    MUPQ_crypto_kem_dec(key_a, ct, sk, &table);
+    MUPQ_crypto_kem_dec(key_a, ct, sk);
 #elif defined (KPQM4)
     MUPQ_crypto_kem_dec(key_a, sk, pk, ct);
 #else

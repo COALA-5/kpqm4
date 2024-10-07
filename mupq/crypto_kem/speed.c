@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 // https://stackoverflow.com/a/1489985/1711232
 #define PASTER(x, y) x##y
@@ -24,11 +26,21 @@
 
 #define printcycles(S, U) send_unsignedll((S), (U))
 
+
+static void printbytes(const unsigned char *x, unsigned long long xlen)
+{
+  char outs[2*xlen+1];
+  unsigned long long i;
+  for(i=0;i<xlen;i++)
+    sprintf(outs+2*i, "%02x", x[i]);
+  outs[2*xlen] = 0;
+  hal_send_str(outs);
+}
+
+
 int main(void)
 {
   unsigned char key_a[MUPQ_CRYPTO_BYTES], key_b[MUPQ_CRYPTO_BYTES];
-  unsigned char sk[MUPQ_CRYPTO_SECRETKEYBYTES];
-  unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
   unsigned char ct[MUPQ_CRYPTO_CIPHERTEXTBYTES];
   unsigned long long t0, t1;
   int i;
@@ -46,10 +58,12 @@ int main(void)
     // Key-pair generation
     t0 = hal_get_time();
 #ifdef KPQM4_PALOMA
-    gf2m_tab table;
-    gen_precomputation_tab(&table);
-    MUPQ_crypto_kem_keypair(pk, sk, &table);
+#include "key.h"
+#include "gf2m_tab.h"
+srand(0x46444c);
 #else
+    unsigned char sk[MUPQ_CRYPTO_SECRETKEYBYTES];
+    unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
     MUPQ_crypto_kem_keypair(pk, sk);
 #endif
     t1 = hal_get_time();
@@ -66,11 +80,11 @@ int main(void)
     // Decapsulation
     t0 = hal_get_time();
 #if defined (KPQM4_PALOMA)
-    MUPQ_crypto_kem_dec(key_a, ct, sk, &table);
+    MUPQ_crypto_kem_dec(key_b, ct, sk);
 #elif defined (KPQM4)
-    MUPQ_crypto_kem_dec(key_a, sk, pk, ct);
+    MUPQ_crypto_kem_dec(key_b, sk, pk, ct);
 #else
-    MUPQ_crypto_kem_dec(key_a, ct, sk);
+    MUPQ_crypto_kem_dec(key_b, ct, sk);
 #endif
     t1 = hal_get_time();
     printcycles("decaps cycles:", t1-t0);

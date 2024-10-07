@@ -38,9 +38,7 @@ unsigned int c;
 uint8_t canary = 0x42;
 
 unsigned char key_a[MUPQ_CRYPTO_BYTES], key_b[MUPQ_CRYPTO_BYTES];
-unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
 unsigned char sendb[MUPQ_CRYPTO_CIPHERTEXTBYTES];
-unsigned char sk_a[MUPQ_CRYPTO_SECRETKEYBYTES];
 unsigned int stack_key_gen, stack_encaps, stack_decaps;
 
 #define FILL_STACK()                                                           \
@@ -59,10 +57,10 @@ static int test_keys(void) {
   // Alice generates a public key
   hal_spraystack();
 #ifdef KPQM4_PALOMA
-    gf2m_tab table;
-    gen_precomputation_tab(&table);
-    MUPQ_crypto_kem_keypair(pk, sk_a, &table);
+#include "key.h"  
 #else
+    unsigned char sk_a[MUPQ_CRYPTO_SECRETKEYBYTES];
+    unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
     MUPQ_crypto_kem_keypair(pk, sk_a);
 #endif
   stack_key_gen = hal_checkstack();
@@ -75,7 +73,7 @@ static int test_keys(void) {
   // Alice uses Bobs response to get her secret key
   hal_spraystack();
 #if defined (KPQM4_PALOMA)
-    MUPQ_crypto_kem_dec(key_a, sendb, sk_a, &table);
+    MUPQ_crypto_kem_dec(key_a, sendb, sk);
 #elif defined (KPQM4)
     MUPQ_crypto_kem_dec(key_a, sk_a, pk, sendb);
 #else

@@ -1,19 +1,4 @@
-import os
+s1 = '2b3e9190de1ef036e414f4c4fd1d4e7181646376c0854e9353722bd00e5f4615f24762f5c813e901f1dc9a51c80b8b622d603ec0f2869c0d69585b089c0e33cb6bffa816b39a8047f89959026bd99dadd8db310de3487cf5a1649bce716fe1fea9d11748b93e747dab33d54cdcb2d9b38ad201e16520e7da27bc61c7b9a0df2e2d459460035d992b'
+s2 = '2B3E9190DE1EF036E414F4C4FD1D4E7181646376C0854E9353722BD00E5F4615F24762F5C813E901F1DC9A51C80B8B622D603EC0F2869C0D69585B089C0E33CB6BFFA816B39A8047F89959026BD99DADD8DB310DE3487CF5A1649BCE716FE1FEA9D11748B93E747DAB33D54CDCB2D9B38AD201E16520E7DA27BC61C7B9A0DF2E2D459460035D992B'.lower()
 
-l= []
-
-def get_max_file_size(directory):
-    max_size = 0
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            file_path = os.path.join(root, file)
-            file_size = os.path.getsize(file_path)
-            l.append(file_size)
-    return l
-
-if __name__ == "__main__":
-    directory = "/bin"
-    l = get_max_file_size(directory)
-    max_size = max(l)
-    print(f"The maximum file size in {directory} is {max_size} bytes.")
-    print(0x40000)
+print(s1 == s2)

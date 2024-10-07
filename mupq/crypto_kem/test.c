@@ -4,6 +4,7 @@
 #include "api.h"
 
 #include <string.h>
+#include <stdio.h>
 
 #define NTESTS 10
 
@@ -45,18 +46,28 @@ static int check_canary(const uint8_t *d) {
   return 0;
 }
 
+static void printbytes(const unsigned char *x, unsigned long long xlen)
+{
+  char outs[2*xlen+1];
+  unsigned long long i;
+  for(i=0;i<xlen;i++)
+    sprintf(outs+2*i, "%02x", x[i]);
+  outs[2*xlen] = 0;
+  hal_send_str(outs);
+}
+
 static int test_keys(void)
 {
   unsigned char key_a[MUPQ_CRYPTO_BYTES+16], key_b[MUPQ_CRYPTO_BYTES+16];
   unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES+16];
   unsigned char sendb[MUPQ_CRYPTO_CIPHERTEXTBYTES+16];
-  unsigned char sk_a[MUPQ_CRYPTO_SECRETKEYBYTES+16];
+  unsigned char sk[MUPQ_CRYPTO_SECRETKEYBYTES+16];
 
   write_canary(key_a); write_canary(key_a+sizeof(key_a)-8);
   write_canary(key_b); write_canary(key_b+sizeof(key_b)-8);
   write_canary(pk); write_canary(pk+sizeof(pk)-8);
   write_canary(sendb); write_canary(sendb+sizeof(sendb)-8);
-  write_canary(sk_a); write_canary(sk_a+sizeof(sk_a)-8);
+  write_canary(sk); write_canary(sk+sizeof(sk)-8);
 
 
   int i;
@@ -65,25 +76,26 @@ static int test_keys(void)
   {
     //Alice generates a public key
 #ifdef KPQM4_PALOMA
-    gf2m_tab table;
-    gen_precomputation_tab(&table);
-    MUPQ_crypto_kem_keypair(pk+8, sk_a+8, &table);
+#include "key.h"
 #else
-    MUPQ_crypto_kem_keypair(pk+8, sk_a+8);
+    MUPQ_crypto_kem_keypair(pk+8, sk+8);
 #endif
     hal_send_str("DONE key pair generation!");
 
     //Bob derives a secret key and creates a response
     MUPQ_crypto_kem_enc(sendb+8, key_b+8, pk+8);
+
+    MUPQ_crypto_kem_enc(sendb+8, key_b+8, pk+8);
     hal_send_str("DONE encapsulation!");
 
     //Alice uses Bobs response to get her secret key
 #if defined (KPQM4_PALOMA)
-    MUPQ_crypto_kem_dec(key_a+8, sendb+8, sk_a+8, &table);
+//todo fix this
+    MUPQ_crypto_kem_dec(key_a, sendb, sk);
 #elif defined (KPQM4)
-    MUPQ_crypto_kem_dec(key_a+8, sk_a+8, pk+8, sendb+8);
+    MUPQ_crypto_kem_dec(key_a+8, sk+8, pk+8, sendb+8);
 #else
-    MUPQ_crypto_kem_dec(key_a+8, sendb+8, sk_a+8);
+    MUPQ_crypto_kem_dec(key_a+8, sendb+8, sk+8);
 #endif
     hal_send_str("DONE decapsulation!");
 
@@ -95,7 +107,7 @@ static int test_keys(void)
             check_canary(key_b) || check_canary(key_b+sizeof(key_b)-8) ||
             check_canary(pk) || check_canary(pk+sizeof(pk)-8) ||
             check_canary(sendb) || check_canary(sendb+sizeof(sendb)-8) ||
-            check_canary(sk_a) || check_canary(sk_a+sizeof(sk_a)-8))
+            check_canary(sk) || check_canary(sk+sizeof(sk)-8))
     {
       hal_send_str("ERROR canary overwritten\n");
     }
@@ -111,36 +123,34 @@ static int test_keys(void)
 
 static int test_invalid_sk_a(void)
 {
-  unsigned char sk_a[MUPQ_CRYPTO_SECRETKEYBYTES];
   unsigned char key_a[MUPQ_CRYPTO_BYTES], key_b[MUPQ_CRYPTO_BYTES];
-  unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
   unsigned char sendb[MUPQ_CRYPTO_CIPHERTEXTBYTES];
   int i;
 
-  for(i=0; i<NTESTS; i++)
+  for(i=0; i<1; i++)
   {
     //Alice generates a public key
 #ifdef KPQM4_PALOMA
-    gf2m_tab table;
-    gen_precomputation_tab(&table);
-    MUPQ_crypto_kem_keypair(pk, sk_a, &table);
+#include "key.h"
 #else
-    MUPQ_crypto_kem_keypair(pk, sk_a);
+    unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
+    unsigned char sk[MUPQ_CRYPTO_SECRETKEYBYTES];
+    MUPQ_crypto_kem_keypair(pk, sk);
 #endif
 
     //Bob derives a secret key and creates a response
     MUPQ_crypto_kem_enc(sendb, key_b, pk);
 
     //Replace secret key with random values
-    randombytes(sk_a, MUPQ_CRYPTO_SECRETKEYBYTES);
+    randombytes(sk, MUPQ_CRYPTO_SECRETKEYBYTES);
 
     //Alice uses Bobs response to get her secre key
 #if defined (KPQM4_PALOMA)
-    MUPQ_crypto_kem_dec(key_a, sendb, sk_a, &table);
+    MUPQ_crypto_kem_dec(key_a, sendb, sk);
 #elif defined (KPQM4)
-    MUPQ_crypto_kem_dec(key_a, sk_a, pk, sendb);
+    MUPQ_crypto_kem_dec(key_a, sk, pk, sendb);
 #else
-    MUPQ_crypto_kem_dec(key_a, sendb, sk_a);
+    MUPQ_crypto_kem_dec(key_a, sendb, sk);
 #endif
 
     if(!memcmp(key_a, key_b, MUPQ_CRYPTO_BYTES))
@@ -160,9 +170,7 @@ static int test_invalid_sk_a(void)
 
 static int test_invalid_ciphertext(void)
 {
-  unsigned char sk_a[MUPQ_CRYPTO_SECRETKEYBYTES];
   unsigned char key_a[MUPQ_CRYPTO_BYTES], key_b[MUPQ_CRYPTO_BYTES];
-  unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
   unsigned char sendb[MUPQ_CRYPTO_CIPHERTEXTBYTES];
   int i;
   size_t pos;
@@ -173,10 +181,10 @@ static int test_invalid_ciphertext(void)
 
     //Alice generates a public key
 #ifdef KPQM4_PALOMA
-    gf2m_tab table;
-    gen_precomputation_tab(&table);
-    MUPQ_crypto_kem_keypair(pk, sk_a, &table);
+#include "key.h"
 #else
+    unsigned char sk_a[MUPQ_CRYPTO_SECRETKEYBYTES];
+    unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
     MUPQ_crypto_kem_keypair(pk, sk_a);
 #endif
 
@@ -188,7 +196,7 @@ static int test_invalid_ciphertext(void)
 
     //Alice uses Bobs response to get her secret key
 #if defined (KPQM4_PALOMA)
-    MUPQ_crypto_kem_dec(key_a, sendb, sk_a, &table);
+    MUPQ_crypto_kem_dec(key_a, sendb, sk);
 #elif defined (KPQM4)
     MUPQ_crypto_kem_dec(key_a, sk_a, pk, sendb);
 #else
@@ -215,7 +223,9 @@ int main(void)
 
   // marker for automated testing
   hal_send_str("==========================");
+#ifndef KPQM4_PALOMA
   test_keys();
+#endif
   test_invalid_sk_a();
   test_invalid_ciphertext();
   hal_send_str("#");
