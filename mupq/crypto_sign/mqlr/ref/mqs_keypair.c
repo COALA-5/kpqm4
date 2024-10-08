@@ -15,8 +15,6 @@
 #define _MALLOC_
 #endif
 
-#include "hal.h"
-
 static
 void generate_T_part(unsigned char* t, prng_t* prng0)
 {
@@ -47,25 +45,21 @@ static
 void _generate_sk_mqlr(sk_mqlr* sk, const unsigned char* sk_seed)
 {
 	memcpy(sk->sk_seed, sk_seed, LEN_SKSEED);
-	hal_send_str("_generate_sk_mqlr 1");
+
 	prng_t prng0;
 	prng_set(&prng0, sk_seed, LEN_SKSEED);
-	hal_send_str("_generate_sk_mqlr 2");
 
 	// generating secret key with prng.
 	generate_T_part(sk->mat_t, &prng0);
 	generate_F(sk->Fq1, &prng0);
-	hal_send_str("_generate_sk_mqlr 3");
 
 	// clean prng
 	memset(&prng0, 0, sizeof(prng_t));
-	hal_send_str("_generate_sk_mqlr 4");
 }
 
 
 int generate_keypair_mqlr(pk_mqs* rpk, sk_mqlr* sk, const unsigned char* sk_seed)
 {
-	hal_send_str("here is inner keypair\n");
 	_generate_sk_mqlr(sk, sk_seed);
 
 #if defined(_MALLOC_)
@@ -75,7 +69,6 @@ int generate_keypair_mqlr(pk_mqs* rpk, sk_mqlr* sk, const unsigned char* sk_seed
 	ext_pk _pk;
 	ext_pk* pk = &_pk;
 #endif
-	hal_send_str("entering cal_ext_pk_mqlr");
 	cal_ext_pk_mqlr(pk, sk, sk);
 
 	extpk_to_pk(rpk, pk);     // convert the public key from ext_pk to pk

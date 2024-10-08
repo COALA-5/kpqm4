@@ -12,8 +12,7 @@
 
 #ifndef _DEBUG_
 
-#include "randombytes.h"
-
+#include "rng.h"
 
 
 #define NDEBUG
@@ -45,8 +44,6 @@ void prng_expand_buffer(void)
 	prng_buffer_size += _BUFFER_SIZE;
 	prng_generated = realloc(prng_generated, prng_buffer_size);
 	if( NULL == prng_generated ) {
-		//printf("alloc for recording randomness fail.\n");
-		//exit(-1);
 		return;
 	}
 }
@@ -62,20 +59,6 @@ unsigned prng_dump( unsigned char ** ptr_rnd_generated )
 	return prng_n_gen;
 }
 
-// int userrand_source_file( const char * file_name )
-// {
-// 	FILE * fp = fopen( file_name , "rb" );
-// 	if( NULL == fp ) return -1;
-
-// 	if( 0 != strcmp( "/dev/random" , file_name ) ) {
-// 		printf("reading randomness %d bytes from: %s", _BUFFER_SIZE , file_name );
-// 		user_source = fread( _source , 1 , _BUFFER_SIZE , fp );
-// 		printf(" .... %d bytes read.\n", user_source );
-// 	}
-
-// 	fclose( fp );
-// 	return 0;
-// }
 
 unsigned userrand_dump_generated( unsigned char * buffer , unsigned size_buffer )
 {

@@ -14,7 +14,7 @@
 #endif
 
 
-#include "randombytes.h"
+#include "rng.h"
 // the macro _SUPERCOP_ might be defined in rng.h
 #if defined(_SUPERCOP_)
 #if 32 == _HASH_LEN

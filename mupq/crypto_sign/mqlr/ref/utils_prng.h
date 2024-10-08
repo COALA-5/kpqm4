@@ -14,9 +14,7 @@ extern  "C" {
 
 
 #ifndef _DEBUG_
-#include "randombytes.h"
-#include "aes.h"
-#include "rng_mqsign.h"
+#include "rng.h"
 
 typedef AES256_CTR_DRBG_struct prng_t;
 

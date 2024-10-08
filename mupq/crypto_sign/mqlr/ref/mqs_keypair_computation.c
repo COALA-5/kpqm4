@@ -11,8 +11,6 @@
 
 #include "utils_malloc.h"
 
-#include "hal.h"
-
 void extpk_to_pk(pk_mqs* pk, const ext_pk* extpk)
 {
 	const unsigned char* idx = extpk->quad1;
@@ -76,19 +74,14 @@ void cal_ext_pk_mqlr_ref(ext_pk* Qs, const sk_mqlr* Fs, const sk_mqlr* Ts)
 #endif
 
 	memset(Qs->quad1, 0, _O * N_TRIANGLE_TERMS(_V));
-	hal_send_str("cal_ext_pk_mqlr_ref 1");
 	UpperTrianglize_circ(Qs->quad1, Fs->Fq1, _V, _O); // F1 
-	hal_send_str("cal_ext_pk_mqlr_ref 1");
 	// Quadratic part
 	memcpy(Qs->quad2, Fs->Fq2, _O * _V * _O);
-	
-	hal_send_str("cal_ext_pk_mqlr_ref 1");
 
 	batch_trimat_madd(tmp2, Qs->quad1, Ts->mat_t, _V, _V, _O, _O); // F1*Ts->mat_t
 	gf256v_add(Qs->quad2, tmp2, _O * _V * _O); // F1*Ts->mat_t + F2
 
 	memset(Qs->quad3, 0, _O * N_TRIANGLE_TERMS(_O));
-	hal_send_str("cal_ext_pk_mqlr_ref 2");
 
 	batch_matTr_madd(tempQ, Ts->mat_t, _V, _V, _O, Qs->quad2, _O, _O); // Ts->mat_t_tr*(F1*Ts->mat_t + F2)
 	UpperTrianglize(Qs->quad3, tempQ, _O, _O);
@@ -97,7 +90,6 @@ void cal_ext_pk_mqlr_ref(ext_pk* Qs, const sk_mqlr* Fs, const sk_mqlr* Ts)
 	gf256v_add(Qs->quad2, tmp2, _O * _V * _O);
 	
 	memset(tempQ, 0, _O * _O * _O);
-	hal_send_str("cal_ext_pk_mqlr_ref 3");
 
 	// // Quadratic part
 	// memcpy(Qs->quad1, Fs->Fq1, _O * N_TRIANGLE_TERMS(_V));

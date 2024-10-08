@@ -31,9 +31,9 @@
 
 int main(void)
 {
-  unsigned char sk[MUPQ_CRYPTO_SECRETKEYBYTES];
-  unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
+
   unsigned char sm[MLEN+MUPQ_CRYPTO_BYTES];
+
   size_t smlen;
   unsigned long long t0, t1;
   int i;
@@ -52,12 +52,12 @@ int main(void)
     // Key-pair generation
     t0 = hal_get_time();
 #ifdef KPQM4_MQSIGN
-    uint8_t seed[48] = {0,};
-    uint8_t ss[32] = {0,};
-    //randombytes_init(seed, NULL, 256);
-    randombytes(seed, 48);
-    MUPQ_crypto_sign_keypair(pk, sk, seed);
+#include "key.h"
+      unsigned char ss[32] = {0,};
+    unsigned char seed[32] = {0,};
 #else 
+  unsigned char sk[MUPQ_CRYPTO_SECRETKEYBYTES];
+  unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
     MUPQ_crypto_sign_keypair(pk, sk);
 #endif
     t1 = hal_get_time();

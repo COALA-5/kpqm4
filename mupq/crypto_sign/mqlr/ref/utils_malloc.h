@@ -37,9 +37,8 @@ void * adapted_alloc( size_t alignment, size_t size )
 //   return aligned_alloc( alignment, size );
 // #else
 //   (void)(alignment);
-//   return malloc( size );
+  return malloc( size );
 // #endif
-  return malloc(size);
 }
 
 

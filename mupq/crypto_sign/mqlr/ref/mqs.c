@@ -28,9 +28,6 @@ void transpose(uint8_t * r, const uint8_t * a)
 
 int mqlr_sign(uint8_t* signature, const sk_mqlr* sk, const uint8_t* sk_seed, const uint8_t* m, const uint32_t mlen, const uint8_t* ss)
 {
-	// pre-declaration for handling gcc error
-	int rr = 0;
-	uint8_t w[_PUB_N_BYTE];
 	// allocate temporary storage.
 	uint8_t mat[_O * _O_BYTE];
 	uint8_t mat_tmp[_O * _O_BYTE];
@@ -84,9 +81,10 @@ int mqlr_sign(uint8_t* signature, const sk_mqlr* sk, const uint8_t* sk_seed, con
 
 	uint8_t temp_vec[_O_BYTE] __attribute__((aligned(32)));
 	uint8_t temp_vec2[_O_BYTE] __attribute__((aligned(32)));
-
+	int rr = 1;
+	//  w = T^-1 * y
+	uint8_t w[_PUB_N_BYTE];
 rej:
-	rr = 1;
 	n_attempt++;
 	if (MAX_ATTEMPT_FRMAT <= n_attempt)
 		goto rej_out;
@@ -133,7 +131,6 @@ rej:
 // remain part of linear solve
 rej_out:
 
-	//  w = T^-1 * y
 
 	// identity part of T.
 	memcpy(w, x_v, _V_BYTE);

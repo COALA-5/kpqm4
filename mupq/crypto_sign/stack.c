@@ -35,10 +35,19 @@
 
 #define send_stack_usage(S, U) send_unsigned((S), (U))
 
+
+
+#ifndef KPQM4_MQSIGN
 unsigned char pk[MUPQ_CRYPTO_PUBLICKEYBYTES];
 unsigned char sk[MUPQ_CRYPTO_SECRETKEYBYTES];
+#else
+#include "key.h"
+#endif
 unsigned char sm[MLEN + MUPQ_CRYPTO_BYTES];
 unsigned char m[MLEN];
+
+    unsigned char ss[32] = {0,};
+    unsigned char seed[32] = {0,};
 
 size_t mlen;
 size_t smlen;
@@ -49,11 +58,6 @@ static int test_sign(void) {
   // Alice generates a public key
   hal_spraystack();
 #ifdef KPQM4_MQSIGN
-    uint8_t seed[48] = {0,};
-    uint8_t ss[32] = {0,};
-    //randombytes_init(seed, NULL, 256);
-    randombytes(seed, 48);
-    MUPQ_crypto_sign_keypair(pk, sk, seed);
 #else 
     MUPQ_crypto_sign_keypair(pk, sk);
 #endif
@@ -63,7 +67,7 @@ static int test_sign(void) {
   randombytes(m, MLEN);
   hal_spraystack();
 #ifdef KPQM4_MQSIGN
-    MUPQ_crypto_sign(sm, &smlen, sm, MLEN, sk, seed, ss);
+        MUPQ_crypto_sign(sm, &smlen, sm, MLEN, sk, seed, ss);
 #else 
     MUPQ_crypto_sign(sm, &smlen, sm, MLEN, sk);
 #endif

@@ -4,7 +4,6 @@
 #include "mqs_keypair.h"
 #include "parallel_matrix_op.h"
 #include "utils_malloc.h"
-#include "hal.h"
 
 void UpperTrianglize( unsigned char * btriC , const unsigned char * bA , unsigned Awidth, unsigned size_batch )
 {
@@ -22,9 +21,7 @@ void UpperTrianglize( unsigned char * btriC , const unsigned char * bA , unsigne
 
 void UpperTrianglize_circ(unsigned char* btriC, const unsigned char* bcirc, unsigned Awidth, unsigned size_batch)
 {
-	hal_send_str("UpperTrianglize_circ here 1 (before malloc)");
 	unsigned char* bA = (unsigned char*)malloc(_O * _V * _V);
-	hal_send_str("UpperTrianglize_circ here 1 (after malloc)");
 	unsigned char bcirc2[(_V * _V) << 1];
 
 	for (unsigned i = 0; i < _V; i++) {

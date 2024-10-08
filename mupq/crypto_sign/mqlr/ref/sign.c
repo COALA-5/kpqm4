@@ -9,20 +9,17 @@
 
 #include "utils_hash.h"
 
-#include "randombytes.h"
+#include "rng.h"
 
 #if defined(_SUPERCOP_)
 #include "crypto_sign.h"
 #endif
 
-#include "hal.h"
+
 int
 crypto_sign_keypair(unsigned char *pk, unsigned char *sk, unsigned char *sk_seed)
 {
-	hal_send_str("keypair inner start...\n");
-	int r;
-	hal_send_str("keypair inner start2...\n");
-	r = generate_keypair_mqlr((pk_mqs*)pk, (sk_mqlr*)sk, sk_seed);
+	int r = generate_keypair_mqlr((pk_mqs*)pk, (sk_mqlr*)sk, sk_seed);
 
 	return r;
 }

@@ -18,7 +18,7 @@
 | NTRU+768  |       ref      |      846023     |         540297         |         744154         |
 | NTRU+864  |       ref      |      903049     |         591688         |         832962         |
 | NTRU+1152 |       ref      |     2161362     |         800569         |        1169875         |
-| PALOMA128*|   ref(flash)   |        -        |        3087378         |        3811089         |
+| PALOMA128*|   ref(flash)   |        -        |         671221         |        21260147        |
 
 ## Digital Signature Schemes
 
@@ -41,7 +41,8 @@
 |   NCC-Sign3    |       m4f      |     1305061     |        4356339         |        1585031         |
 |   NCC-Sign5    |       ref      |     2897092     |        12046625        |        4731909         |
 |   NCC-Sign5    |       m4f      |     1965693     |        5821410         |        2447042         |
-| MQ-Sign-LR-128*|   ref(flash)   |        -        |       54269062         |        81148106        |
+| MQ-Sign-LR-128*|   ref(flash)   |        -        |        9815101         |        14340523        |
+
 
 
 # Memory Usage
@@ -56,6 +57,7 @@
 | NTRU+768  |       ref      |      9644       |          9544          |          17808         |
 | NTRU+864  |       ref      |      10796      |          10640         |          19936         |
 | NTRU+1152 |       ref      |      14252      |          13912         |          26304         |
+| PALOMA128*|   ref(flash)   |        -        |         15700          |          17308         |
 
 ## Digital Signature Schemes
 
@@ -78,6 +80,8 @@
 | NCC-Sign3 |       m4f      |      42104      |         67000          |         49548          |
 | NCC-Sign5 |       ref      |      56672      |         98948          |         67264          |
 | NCC-Sign5 |       m4f      |      62888      |         100072         |         73480          |
+| MQ-Sign-LR-128*| ref(flash)|        -        |         27364          |          808           |
+
 
 # Hash Evaluation
 ## Key Encapsulation Schemes
@@ -105,3 +109,9 @@
 | NCC-Sign2 |       ref      |    45.68   |   20.20   |     28.47    |
 | NCC-Sign3 |       ref      |    47.28   |   18.24   |     30.47    |
 | NCC-Sign5 |       ref      |    44.98   |   19.48   |     27.20    |
+| MQ-Sign-LR-128*| ref(flash)|      -     |    1.47   |      0.08    |
+
+
+# TODO - will be updated soon (benchmark result at STM32429I-EVAL1)
+| MQ-Sign-LR-128*|   ref(flash)   |        -        |       54269062         |        81148106        |
+| PALOMA128*|   ref(flash)   |        -        |        3087378         |        3811089         |
