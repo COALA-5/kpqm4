@@ -37,6 +37,14 @@ int main(void)
 
   hal_send_str("==========================");
 
+  unsigned long long total_keypair = 0;
+  unsigned long long total_encaps = 0;
+  unsigned long long total_decaps = 0;
+
+  unsigned long long total_hash_keypair = 0;
+  unsigned long long total_hash_encaps = 0;
+  unsigned long long total_hash_decaps = 0;
+
   for(i=0;i<MUPQ_ITERATIONS; i++)
   {
     // Key-pair generation
@@ -52,6 +60,8 @@ int main(void)
     t1 = hal_get_time();
     printcycles("keypair cycles:", t1-t0);
     printcycles("keypair hash cycles:", hash_cycles);
+    total_keypair += t1-t0;
+    total_hash_keypair += hash_cycles;
 
     // Encapsulation
     hash_cycles = 0;
@@ -60,20 +70,24 @@ int main(void)
     t1 = hal_get_time();
     printcycles("encaps cycles:", t1-t0);
     printcycles("encaps hash cycles:", hash_cycles);
+    total_encaps += t1-t0;
+    total_hash_encaps += hash_cycles;
 
     // Decapsulation
     hash_cycles = 0;
     t0 = hal_get_time();
 #if defined (KPQM4_PALOMA)
-    MUPQ_crypto_kem_dec(key_a, ct, sk);
+    MUPQ_crypto_kem_dec(key_b, ct, sk);
 #elif defined (KPQM4)
-    MUPQ_crypto_kem_dec(key_a, sk, pk, ct);
+    MUPQ_crypto_kem_dec(key_b, sk, pk, ct);
 #else
-    MUPQ_crypto_kem_dec(key_a, ct, sk);
+    MUPQ_crypto_kem_dec(key_b, ct, sk);
 #endif
     t1 = hal_get_time();
     printcycles("decaps cycles:", t1-t0);
     printcycles("decaps hash cycles:", hash_cycles);
+    total_decaps += t1-t0;
+    total_hash_decaps += hash_cycles;
 
     if (memcmp(key_a, key_b, MUPQ_CRYPTO_BYTES)) {
       hal_send_str("ERROR KEYS\n");
@@ -83,6 +97,9 @@ int main(void)
     }
     hal_send_str("+");
   }
+  printcycles("keypair hash ratio:\n", total_hash_keypair * 10000 / total_keypair);
+  printcycles("encaps hash ratio:\n", total_hash_encaps * 10000 / total_encaps);
+  printcycles("decaps hash ratio:\n", total_hash_decaps * 10000 / total_decaps);
   hal_send_str("#");
   return 0;
 }

@@ -115,7 +115,7 @@ void shake256_inc_absorb(shake256incctx *state, const uint8_t *input, size_t inl
 /* Prepares for squeeze phase */
 void shake256_inc_finalize(shake256incctx *state);
 
-
+void shake256_squeeze(uint8_t *out, size_t outlen, shake256incctx *state);
 
 /* Squeeze output out of the sponge.
  *
