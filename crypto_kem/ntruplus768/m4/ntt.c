@@ -93,6 +93,7 @@ void ntt(int16_t r[NTRUPLUS_N], const int16_t a[NTRUPLUS_N])
 {
 	int16_t t1,t2,t3;
 	int16_t zeta1,zeta2;
+
 	int k = 1;
 
 	zeta1 = zetas[k++];
@@ -132,15 +133,10 @@ void ntt(int16_t r[NTRUPLUS_N], const int16_t a[NTRUPLUS_N])
 			{
 				t1 = fqmul(zeta1, r[i + step]);
 				
-				r[i + step] = r[i] - t1;
-				r[i       ] = r[i] + t1;
+				r[i + step] = barrett_reduce(r[i] - t1);
+				r[i       ] = barrett_reduce(r[i] + t1);
 			}
 		}
-	}
-
-	for (int i = 0; i < NTRUPLUS_N; i++)
-	{
-		r[i] = barrett_reduce(r[i]);
 	}
 }
 
