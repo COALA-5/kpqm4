@@ -39,6 +39,14 @@ int main(void)
   unsigned long long t0, t1;
   int i;
 
+  unsigned long long total_keypair = 0;
+  unsigned long long total_sign = 0;
+  unsigned long long total_verify = 0;
+
+  unsigned long long total_hash_keypair = 0;
+  unsigned long long total_hash_sign = 0;
+  unsigned long long total_hash_verify = 0;
+
   hal_setup(CLOCK_BENCHMARK);
 
   hal_send_str("==========================");
@@ -60,6 +68,8 @@ int main(void)
     t1 = hal_get_time();
     printcycles("keypair cycles:", t1-t0);
     printcycles("keypair hash cycles:", hash_cycles);
+    total_keypair += t1-t0;
+    total_hash_keypair += hash_cycles;
 
     // Signing
     hash_cycles = 0;
@@ -72,6 +82,8 @@ int main(void)
     t1 = hal_get_time();
     printcycles("sign cycles:", t1-t0);
     printcycles("sign hash cycles:", hash_cycles);
+    total_sign += t1-t0;
+    total_hash_sign += hash_cycles;
 
     // Verification
     hash_cycles = 0;
@@ -80,10 +92,15 @@ int main(void)
     t1 = hal_get_time();
     printcycles("verify cycles:", t1-t0);
     printcycles("verify hash cycles:", hash_cycles);
+    total_verify += t1-t0;
+    total_hash_verify += hash_cycles;
 
     hal_send_str("+");
   }
-
+  printcycles("keypair hash ratio:\n", total_hash_keypair * 10000 / total_keypair);
+  printcycles("sign hash ratio:\n", total_hash_sign * 10000 / total_sign);
+  printcycles("verify hash ratio:\n", total_hash_verify * 10000 / total_verify);
+  
   hal_send_str("#");
   return 0;
 }
