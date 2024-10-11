@@ -83,11 +83,6 @@ typedef struct {
     poly vec[L];
 } polyvecl;
 
-/* Vectors of frozen polynomials of length L */
-typedef struct {
-    poly_frozen vec[L];
-} polyvecl_frozen;
-
 #define polyvecl_cneg HAETAE_NAMESPACE(polyvecl_cneg)
 void polyvecl_cneg(polyvecl *v, const uint8_t b);
 
@@ -107,10 +102,6 @@ void polyvecl_pointwise_acc_montgomery(poly *w,
                                        const polyvecl *u,
                                        const polyvecl *v);
 
-#define polyvecl_pointwise_acc_montgomery_frozen HAETAE_NAMESPACE(polyvecl_pointwise_acc_montgomery_frozen)
-void polyvecl_pointwise_acc_montgomery_frozen(poly *w, 
-                                              const polyvecl_frozen *u,
-                                              const polyvecl *v);
 
 /* Vectors of polynomials of length M */
 typedef struct {

@@ -34,36 +34,6 @@ unsigned int rej_uniform(int32_t *a, unsigned int len, const uint8_t *buf,
 }
 
 /*************************************************
- * Name:        rej_uniform_frozen
- *
- * Description: Sample uniformly random coefficients in [0, Q-1] by
- *              performing rejection sampling on array of random bytes.
- *
- * Arguments:   - int32_t *a: pointer to output array (allocated)
- *              - unsigned int len: number of coefficients to be sampled
- *              - const uint8_t *buf: array of random bytes
- *              - unsigned int buflen: length of array of random bytes
- *
- * Returns number of sampled coefficients. Can be smaller than len if not enough
- * random bytes were given.
- **************************************************/
-unsigned int rej_uniform_frozen(uint16_t *a, unsigned int len, const uint8_t *buf,
-                         unsigned int buflen) {
-    unsigned int ctr, pos;
-    uint16_t t;
-
-    ctr = pos = 0;
-    while (ctr < len && pos + 2 <= buflen) {
-        t = buf[pos++];
-        t |= (uint16_t)buf[pos++] << 8;
-
-        if (t < Q)
-            a[ctr++] = t;
-    }
-    return ctr;
-}
-
-/*************************************************
  * Name:        rej_eta
  *
  * Description: Sample uniformly random coefficients in [-ETA, ETA] by
@@ -194,10 +164,9 @@ static uint64_t sample_gauss16(const uint64_t rand16) {
 #define GAUSS_RAND_BYTES ((GAUSS_RAND + 7) / 8)
 static int sample_gauss_sigma76(uint64_t *r, fp96_76 *sqr,
                                 const uint8_t rand[GAUSS_RAND_BYTES]) {
-    const uint64_t *rand_gauss16_ptr = (uint64_t *)rand,
-                   *rand_rej_ptr = (uint64_t *)(&rand[2]);
-    const uint64_t rand_gauss16 = (*rand_gauss16_ptr) & ((1ULL << 16) - 1);
-    const uint64_t rand_rej = (*rand_rej_ptr) & ((1ULL << 48) - 1);
+    const uint64_t rand_gauss16 = rand[0] | (((uint64_t) rand[1]) << 8); 
+    const uint64_t rand_rej = rand[2] | (((uint64_t) rand[3]) << 8) | (((uint64_t) rand[4]) << 16) | (((uint64_t) rand[5]) << 24)
+     | (((uint64_t) rand[6]) << 32) | (((uint64_t) rand[7]) << 40);
     uint64_t x, exp_in;
     fp96_76 y;
 

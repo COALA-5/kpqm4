@@ -59,24 +59,6 @@ void poly_pointwise_montgomery(poly *c, const poly *a, const poly *b) {
 }
 
 /*************************************************
- * Name:        poly_pointwise_montgomery_frozen
- *
- * Description: Pointwise multiplication of polynomials in NTT domain
- *              representation and multiplication of resulting polynomial
- *              by 2^{-32}.
- *
- * Arguments:   - poly *c: pointer to output polynomial
- *              - const poly_frozen *a: pointer to first input polynomial
- *              - const poly *b: pointer to second input polynomial
- **************************************************/
-void poly_pointwise_montgomery_frozen(poly *c, const poly_frozen *a, const poly *b) {
-    unsigned int i;
-
-    for (i = 0; i < N; ++i)
-        c->coeffs[i] = montgomery_reduce((int64_t)a->coeffs[i] * b->coeffs[i]);
-}
-
-/*************************************************
  * Name:        poly_reduce2q
  *
  * Description: Inplace reduction of all coefficients of polynomial to 2q
@@ -165,7 +147,7 @@ void poly_compose(poly *a, const poly *ha, const poly *la) {
     unsigned int i = 0;
 
     for (i = 0; i < N; ++i)
-        a->coeffs[i] = (ha->coeffs[i] << 8) + la->coeffs[i];
+        a->coeffs[i] = (ha->coeffs[i] * 256) + la->coeffs[i];
 }
 
 /*************************************************
@@ -188,7 +170,7 @@ void poly_lsb(poly *a0, const poly *a) {
  *
  * Description: Sample polynomial with uniformly random coefficients
  *              in [0,Q-1] by performing rejection sampling on the
- *              output stream of SHAKE256(seed|nonce)
+ *              output stream of SHAKE128(seed|nonce)
  *
  * Arguments:   - poly *a: pointer to output polynomial
  *              - const uint8_t seed[]: byte array with seed of length SEEDBYTES
@@ -217,39 +199,6 @@ void poly_uniform(poly *a, const uint8_t seed[SEEDBYTES], uint16_t nonce) {
         stream128_squeezeblocks(buf + off, 1, &state);
         buflen = STREAM128_BLOCKBYTES + off;
         ctr += rej_uniform(a->coeffs + ctr, N - ctr, buf, buflen);
-    }
-}
-
-/*************************************************
- * Name:        poly_uniform_frozen
- *
- * Description: Sample polynomial with uniformly random coefficients
- *              in [0,Q-1] by performing rejection sampling on the
- *              output stream of SHAKE256(seed|nonce)
- *
- * Arguments:   - poly *a: pointer to output polynomial
- *              - const uint8_t seed[]: byte array with seed of length SEEDBYTES
- *              - uint16_t nonce: 2-byte nonce
- **************************************************/
-void poly_uniform_frozen(poly_frozen *a, const uint8_t seed[SEEDBYTES], uint16_t nonce) {
-    unsigned int i, ctr, off;
-    unsigned int buflen = POLY_UNIFORM_NBLOCKS * STREAM128_BLOCKBYTES;
-    uint8_t buf[POLY_UNIFORM_NBLOCKS * STREAM128_BLOCKBYTES + 1];
-    stream128_state state;
-
-    stream128_init(&state, seed, nonce);
-    stream128_squeezeblocks(buf, POLY_UNIFORM_NBLOCKS, &state);
-
-    ctr = rej_uniform_frozen(a->coeffs, N, buf, buflen);
-
-    while (ctr < N) {
-        off = buflen % 2;
-        for (i = 0; i < off; ++i)
-            buf[i] = buf[buflen - off + i];
-
-        stream128_squeezeblocks(buf + off, 1, &state);
-        buflen = STREAM128_BLOCKBYTES + off;
-        ctr += rej_uniform_frozen(a->coeffs + ctr, N - ctr, buf, buflen);
     }
 }
 
@@ -314,7 +263,7 @@ void poly_challenge(poly *c, const uint8_t highbits_lsb[POLYVECK_HIGHBITS_PACKED
     xof256_state state;
 
     // H(HighBits(A * y mod 2q), LSB(round(y0) * j), M)
-    xof256_absorb_twice(&state, highbits_lsb,
+    xof256_absorbe_twice(&state, highbits_lsb,
                          POLYVECK_HIGHBITS_PACKEDBYTES + POLYC_PACKEDBYTES, mu,
                          SEEDBYTES);
     xof256_squeezeblocks(buf, 1, &state);
@@ -341,7 +290,7 @@ void poly_challenge(poly *c, const uint8_t highbits_lsb[POLYVECK_HIGHBITS_PACKED
     xof256_state state;
 
     // H(HighBits(A * y mod 2q), LSB(round(y0) * j), M)
-    xof256_absorb_twice(&state, highbits_lsb,
+    xof256_absorbe_twice(&state, highbits_lsb,
                          POLYVECK_HIGHBITS_PACKEDBYTES + POLYC_PACKEDBYTES, mu,
                          SEEDBYTES);
     xof256_squeeze(buf, 32, &state);

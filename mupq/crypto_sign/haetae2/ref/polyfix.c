@@ -42,12 +42,8 @@ void polyfixfix_sub(polyfix *c, const polyfix *a, const polyfix *b) {
 }
 
 int32_t fix_round(int32_t num) {
-    num += (num >> 31) & (-LN + 1);
-    num +=
-        LN /
-        2; // total \floor(LN / 2) if positive, -\floor(LN / 2) + 1 if negative
-    return num / LN;
-}
+    return (num + LNHALF) >> LNBITS;
+} 
 
 /*************************************************
  * Name:        polyfix_round
