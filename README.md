@@ -56,16 +56,18 @@ make -j16 PLATFORM=nucleo-l4r5zi
 # If you do not use -j option, it will take lots of times.
 ```
 
+## Integrity Check
+You can flash the HMAC-SHA-256 value of the binary(`.bin`) for integrity check.
+The key is hard-coded as all zero, and the HMAC value is flashed into the address `0x081FF000`.
+To flash the integrity check value, run `./integrity_test/flash_hmac.sh` at the top directory, then input the name of binary file except `.bin`.
 
+## Documents
+The presentation metarials of the 8, 9th KpqC workshops, and implementation guide on Cortex-M4 are available in `documents` directory.
 
 ## Future Works
 - [ ] Make a table contains each size of pk, sk, ct/sig
-- [X] Write builing steps
-- [X] Add hashing evaulations
 - [ ] Add max/min/median clock cycles (only shows average clock cycles for now)
 - [ ] ... and more
-
-
 
 ## Contributors
 * Seog Chung Seo, Professor (scseo@kookmin.ac.kr)
