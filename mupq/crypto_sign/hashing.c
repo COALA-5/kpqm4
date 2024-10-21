@@ -51,7 +51,7 @@ int main(void)
 
   hal_send_str("==========================");
 
-  for(i=0;i<MUPQ_ITERATIONS; i++)
+  for(i=0;i<1; i++)
   {
     // Key-pair generation
     hash_cycles = 0;
